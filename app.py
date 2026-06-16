@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -59,7 +59,7 @@ df["current_speed"] = np.sqrt(df["uo"]**2 + df["vo"]**2)
 df["Ocean_Health_Index"] = (
     0.25 * normalisasi_global(df["do"], 5.0, 7.0) +
     0.20 * normalisasi_global(df["ph"], 8.0, 8.3) +
-    0.20 * normalisasi_global(df["chla"], 0.1, 0.4) +
+    0.20 * normalizations_global(df["chla"], 0.1, 0.4) +
     0.15 * normalisasi_global(df["salinitas"], 33.5, 35.0) +
     0.20 * (1 - normalisasi_global(df["gelombang"], 0.4, 1.5))
 ) * 100
@@ -141,11 +141,11 @@ else: # Mode Prediksi
     waktu_label = f"Proyeksi {bulan_pred}"
 
 # =========================================
-# 5. GENERASI GRID SPASIAL PAPUA (MASKING TELUK DIPERBAIKI LENGKAP!)
+# 5. GENERASI GRID SPASIAL PAPUA (KUNCI MURNI LAUT ARAFURA)
 # =========================================
-# Pakai grid 20x20 biar makin halus dan teluknya bisa terisi bintik data dengan padat sempurna
-lat_grid = np.linspace(-9.0, -1.5, 20)  
-lon_grid = np.linspace(130.0, 141.0, 20)
+# 🌟 KUNCI COORD BOX: Batas lintang digeser ke bawah agar fokus di Laut Arafura saja!
+lat_grid = np.linspace(-9.0, -5.5, 15)  
+lon_grid = np.linspace(133.5, 141.0, 15)
 lon_g, lat_g = np.meshgrid(lon_grid, lat_grid)
 
 lat_flat = lat_g.flatten()
@@ -163,14 +163,11 @@ for i in range(len(lat_flat)):
     t_lat = lat_flat[i]
     t_lon = lon_flat[i]
     
-    # 🌟 LOGIKA MASKING BARU: Membuka celah teluk (Kaimana/Timika) agar dot-nya muncul!
-    # Hanya mengunci daerah daratan pegunungan tengah ke atas dan daratan Merauke bawah asli
-    if t_lon > 135.5 and (-4.0 < t_lat < -2.2): # Pegunungan Tengah Papua asli
-        continue
-    if t_lon > 137.0 and t_lat <= -4.0: # Daratan Merauke / Papua Selatan asli
+    # Land masking daratan Merauke / Papua Selatan asli bagian kanan bawah map
+    if t_lon > 137.5 and t_lat > -8.2: 
         continue
         
-    var_spasial = np.sin(t_lon * 1.5) * 3.0 + np.cos(t_lat * 1.2) * 2.5
+    var_spasial = np.sin(t_lon * 2.0) * 2.5 + np.cos(t_lat * 1.5) * 2.0
     
     grid_uo = val_uo_base + (var_spasial * 0.01)
     grid_vo = val_vo_base + (var_spasial * 0.005)
@@ -226,12 +223,13 @@ if st.session_state.role == "nelayan":
     st.markdown(f"### 🗺️ Peta Potensi Zona Tangkap Ikan — Mode {mode} ({waktu_label})")
     
     if not df_map.empty:
+        # Kunci fokus kamera mapbox pas di tengah perairan Laut Arafura (-7.3 Lat, 137.5 Lon)
         fig_map = px.scatter_mapbox(
             df_map, lat="lat", lon="lon", color="Fisheries_Index",
-            color_continuous_scale="Turbo", zoom=4.6, mapbox_style="open-street-map",
+            color_continuous_scale="Turbo", zoom=5.5, mapbox_style="open-street-map",
             range_color=[float(df_map["Fisheries_Index"].min()), float(df_map["Fisheries_Index"].max())]
         )
-        fig_map.update_layout(mapbox=dict(center=dict(lat=-5.0, lon=135.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=540)
+        fig_map.update_layout(mapbox=dict(center=dict(lat=-7.3, lon=137.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=540)
         st.plotly_chart(fig_map, use_container_width=True)
         
         st.write("---")
@@ -239,9 +237,9 @@ if st.session_state.role == "nelayan":
         mean_fsi = df_map['Fisheries_Index'].mean()
         
         if mean_fsi > 73:
-            st.success(f"🟢 **STATUS: SANGAT AMAN & BANYAK IKAN!** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nNutrisi laut melimpah di perairan dalam. Sangat direkomendasikan menurunkan jaring di area berwarna merah/oranye pada peta!")
+            st.success(f"🟢 **STATUS: SANGAT AMAN & BANYAK IKAN!** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nNutrisi laut melimpah di perairan dalam Laut Arafura. Sangat direkomendasikan menurunkan jaring di area berwarna merah/oranye!")
         elif mean_fsi > 55:
-            st.info(f"🔵 **STATUS: KONDISI AMAN NORMAL.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nPergerakan ikan konstan mengikuti arah pergerakan arus permukaan perairan Papua. Operasi nelayan berjalan stabil.")
+            st.info(f"🔵 **STATUS: KONDISI AMAN NORMAL.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nPergerakan ikan konstan mengikuti arah pergerakan arus permukaan. Operasi nelayan berjalan stabil.")
         else:
             st.warning(f"🟡 **STATUS: WASPADA TANGKAPAN RENDAH.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nSuhu permukaan laut berfluktuasi. Disarankan memancing di sekitar pesisir pantai dekat teluk.")
 
@@ -281,10 +279,10 @@ else:
             
             fig_map = px.scatter_mapbox(
                 df_map, lat="lat", lon="lon", color=parameter,
-                color_continuous_scale=cmap, zoom=4.6, mapbox_style="open-street-map",
+                color_continuous_scale=cmap, zoom=5.4, mapbox_style="open-street-map",
                 range_color=[float(df_map[parameter].min()), float(df_map[parameter].max())]
             )
-            fig_map.update_layout(mapbox=dict(center=dict(lat=-5.0, lon=135.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=500)
+            fig_map.update_layout(mapbox=dict(center=dict(lat=-7.3, lon=137.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=500)
             st.plotly_chart(fig_map, use_container_width=True)
             
     with tab2:
