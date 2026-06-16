@@ -459,21 +459,79 @@ with st.sidebar:
 # LAND MASK
 # =========================================
 def is_land(lat, lon):
-    if lon < 132.0 and lat > -6.5: return True
-    if lon < 133.5 and lat > -5.5: return True
-    if lon < 134.5 and lat > -5.0: return True
-    if lon < 136.0 and lat > -4.5: return True
-    if lon < 138.0 and lat > -4.2: return True
-    if lon < 139.0 and lat > -4.3: return True
-    if lon < 140.0 and lat > -4.5: return True
-    if lon < 141.0 and lat > -5.0: return True
-    if lon < 141.5 and lat > -5.5: return True
-    if lon > 140.5 and lon < 141.5 and lat > -8.0 and lat < -5.5: return True
-    if lon < 131.5 and lat > -5.0: return True
-    if lon < 130.5 and lat > -6.5: return True
-    if lat > -5.8 and lon > 136.0 and lon < 138.5: return True
-    if lat > -6.2 and lon > 137.5 and lon < 139.5: return True
-    if lat > -6.8 and lon > 139.0 and lon < 141.0: return True
+    """
+    Land mask manual untuk kawasan Papua & Laut Arafura.
+    Koordinat batas dibuat berdasarkan garis pantai aktual.
+    Return True = daratan (titik dibuang).
+    """
+
+    # ── DARATAN UTAMA PAPUA (pesisir selatan) ──────────────────────────
+    # Pantai selatan Papua membentuk garis kasar dari barat ke timur
+    # Kita gunakan potongan-potongan polygon per segmen longitude
+
+    # Ujung barat Papua (Kepala Burung / Sorong area)
+    if 129.0 <= lon <= 132.5:
+        # Garis pantai selatan Kepala Burung ~-4.0 sampai -6.5
+        # Daratan di atas garis pantai selatan
+        south_coast = -4.2 - (lon - 129.0) * 0.35   # turun dari -4.2 ke ~-5.2
+        if lat > south_coast:
+            return True
+
+    # Teluk Bintuni — cekungan teluk (bukan daratan, biarkan sebagai laut)
+    # Teluk Bintuni: lon 133.0–134.0, lat -1.5 sampai -3.5 → biarkan
+    if 132.5 <= lon <= 133.8:
+        # Daratan di utara (mainland Papua), pantai selatan sekitar -4.0
+        if lat > -4.0:
+            return True
+        # Semenanjung Bomberai di selatan Teluk Bintuni
+        if lat > -4.5 and lon <= 133.2:
+            return True
+
+    # Segmen tengah Papua (Merauke corridor)
+    if 133.8 <= lon <= 137.0:
+        # Pantai selatan Papua di sini sekitar -5.0 hingga -6.5
+        south_coast = -5.0 - (lon - 133.8) * 0.45
+        if lat > south_coast:
+            return True
+
+    # Teluk Flamingo / Mappi area
+    if 137.0 <= lon <= 138.5:
+        south_coast = -6.5 - (lon - 137.0) * 0.2
+        if lat > south_coast:
+            return True
+
+    # Merauke ke perbatasan PNG
+    if 138.5 <= lon <= 141.0:
+        south_coast = -6.8
+        if lat > south_coast:
+            return True
+
+    # PNG (east of 141)
+    if lon > 141.0:
+        if lat > -7.0:
+            return True
+
+    # ── KEPULAUAN KECIL ────────────────────────────────────────────────
+
+    # Pulau Aru (kepulauan, bukan massa daratan penuh)
+    # Aru: ~134.5–135.7, -5.5 sampai -7.2 — biarkan sebagian besar sebagai laut
+    # hanya mask pulau-pulau kecilnya secara kasar
+    if 134.4 <= lon <= 135.8 and -7.2 <= lat <= -5.4:
+        # Pulau Aru kecil, bukan seluruh area
+        # Sibilik/Wokam inti: 134.5–135.0, -5.5 sampai -6.5
+        if 134.5 <= lon <= 135.1 and -6.5 <= lat <= -5.5:
+            return True
+
+    # Kepulauan Kai Besar / Kai Kecil
+    if 132.5 <= lon <= 133.0 and -5.8 <= lat <= -5.0:
+        return True
+
+    # Kepulauan Tanimbar (barat Arafura)
+    if 131.0 <= lon <= 132.0 and -8.5 <= lat <= -7.0:
+        return True
+
+    # Pulau-pulau kecil Arafura lainnya — lewati (terlalu kecil, biarkan)
+
     return False
 
 # =========================================
