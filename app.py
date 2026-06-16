@@ -11,251 +11,201 @@ st.set_page_config(
 )
 
 # =========================================
-# DESIGN SYSTEM — Deep Ocean Terminal
+# DESIGN SYSTEM — Bright Coastal Sunshine
 # =========================================
 STYLE = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── Base ── */
 html, body, [class*="css"] {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .stApp {
-    background-color: #060E1A;
-    color: #C8D8E8;
+    background: linear-gradient(160deg, #E8F6FF 0%, #F0FAFF 40%, #FFF8F0 100%);
+    color: #1A3A5C;
 }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #0A1628 !important;
-    border-right: 1px solid #1A2E4A;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F0F8FF 100%) !important;
+    border-right: 2px solid #C8E8FF !important;
+    box-shadow: 4px 0 20px rgba(30, 120, 200, 0.08) !important;
 }
 [data-testid="stSidebar"] * {
-    color: #8BA8C4 !important;
+    color: #1A3A5C !important;
 }
 [data-testid="stSidebar"] .stSelectbox label,
 [data-testid="stSidebar"] .stRadio label {
-    color: #4A7FA0 !important;
+    color: #2E7DC4 !important;
     font-size: 11px !important;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'DM Mono', monospace !important;
+    font-weight: 500 !important;
 }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    color: #4A7FA0 !important;
+    color: #4A8EC4 !important;
     font-size: 12px !important;
 }
 
-/* Sidebar selectbox & radio */
 [data-testid="stSidebar"] .stSelectbox > div > div {
-    background: #0F1F35 !important;
-    border: 1px solid #1A3050 !important;
-    color: #8BA8C4 !important;
-    border-radius: 6px !important;
+    background: #EBF5FF !important;
+    border: 1.5px solid #7EC8F0 !important;
+    color: #1A3A5C !important;
+    border-radius: 10px !important;
 }
 
 /* ── Buttons ── */
 .stButton > button {
-    background: transparent !important;
-    border: 1px solid #1A3A5C !important;
-    color: #4ECDC4 !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 12px !important;
-    letter-spacing: 0.05em;
-    border-radius: 6px !important;
-    transition: all 0.2s ease !important;
-    padding: 8px 16px !important;
+    background: linear-gradient(135deg, #1E90D4 0%, #0FB8D4 100%) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    border-radius: 12px !important;
+    transition: all 0.25s ease !important;
+    padding: 10px 20px !important;
+    box-shadow: 0 4px 14px rgba(30, 144, 212, 0.3) !important;
 }
 .stButton > button:hover {
-    background: #0D2137 !important;
-    border-color: #4ECDC4 !important;
-    color: #4ECDC4 !important;
-    box-shadow: 0 0 12px rgba(78,205,196,0.2) !important;
+    background: linear-gradient(135deg, #1678B8 0%, #0FA0BC 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(30, 144, 212, 0.4) !important;
 }
 
 /* ── Metric cards ── */
 [data-testid="stMetric"] {
-    background: #0A1628;
-    border: 1px solid #1A2E4A;
-    border-radius: 10px;
+    background: #FFFFFF;
+    border: 1.5px solid #C8E8FF;
+    border-radius: 14px;
     padding: 16px 20px !important;
+    box-shadow: 0 2px 12px rgba(30, 120, 200, 0.08);
 }
 [data-testid="stMetricLabel"] {
-    color: #4A7FA0 !important;
+    color: #5A9EC8 !important;
     font-size: 11px !important;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: 'DM Mono', monospace !important;
+    font-weight: 500 !important;
 }
 [data-testid="stMetricValue"] {
-    color: #4ECDC4 !important;
+    color: #1A3A5C !important;
     font-size: 26px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
 }
 
 /* ── Tabs ── */
 .stTabs [data-baseweb="tab-list"] {
-    background: transparent !important;
-    border-bottom: 1px solid #1A2E4A !important;
+    background: #FFFFFF !important;
+    border-bottom: 2px solid #C8E8FF !important;
+    border-radius: 12px 12px 0 0 !important;
     gap: 0px;
+    padding: 0 8px;
 }
 .stTabs [data-baseweb="tab"] {
     background: transparent !important;
     border: none !important;
-    color: #4A7FA0 !important;
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 12px !important;
-    padding: 10px 20px !important;
+    color: #5A9EC8 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 12px 20px !important;
     border-radius: 0 !important;
 }
 .stTabs [aria-selected="true"] {
-    color: #4ECDC4 !important;
-    border-bottom: 2px solid #4ECDC4 !important;
+    color: #1E90D4 !important;
+    border-bottom: 3px solid #1E90D4 !important;
+    font-weight: 700 !important;
 }
 
 /* ── Divider ── */
 hr {
-    border-color: #1A2E4A !important;
+    border-color: #C8E8FF !important;
 }
 
 /* ── Alert boxes ── */
-.stSuccess, .stInfo, .stWarning {
-    background: #0A1628 !important;
-    border-radius: 8px !important;
+.stSuccess {
+    background: #F0FFF8 !important;
+    border-left: 4px solid #00C48C !important;
+    border-radius: 10px !important;
 }
-[data-testid="stNotification"] {
-    background: #0D1E30 !important;
+.stInfo {
+    background: #EBF8FF !important;
+    border-left: 4px solid #1E90D4 !important;
+    border-radius: 10px !important;
+}
+.stWarning {
+    background: #FFF8E8 !important;
+    border-left: 4px solid #F5A623 !important;
+    border-radius: 10px !important;
 }
 
 /* ── Dataframe ── */
 .stDataFrame {
-    background: #0A1628 !important;
-    border: 1px solid #1A2E4A !important;
-    border-radius: 8px !important;
+    background: #FFFFFF !important;
+    border: 1.5px solid #C8E8FF !important;
+    border-radius: 10px !important;
 }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #EBF5FF; }
+::-webkit-scrollbar-thumb { background: #7EC8F0; border-radius: 3px; }
 
 /* ── Custom components ── */
 .ocean-header {
-    border-left: 3px solid #4ECDC4;
-    padding: 4px 0 4px 16px;
+    border-left: 4px solid #1E90D4;
+    padding: 6px 0 6px 18px;
     margin-bottom: 20px;
 }
 .ocean-header h1 {
     font-size: 28px;
-    font-weight: 700;
-    color: #E8F4F8;
+    font-weight: 800;
+    color: #1A3A5C;
     margin: 0;
     letter-spacing: -0.02em;
 }
 .ocean-header .subtitle {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: #4ECDC4;
+    color: #1E90D4;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin-top: 4px;
 }
 
-.status-badge {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.06em;
-}
-
-.hero-home {
-    text-align: center;
-    padding: 60px 20px 40px;
-}
-.hero-home h1 {
-    font-size: 52px;
-    font-weight: 700;
-    color: #E8F4F8;
-    letter-spacing: -0.03em;
-    margin-bottom: 8px;
-}
-.hero-home .tagline {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: #4ECDC4;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 48px;
-}
-
-.role-card {
-    background: #0A1628;
-    border: 1px solid #1A2E4A;
-    border-radius: 12px;
-    padding: 32px 24px;
-    text-align: center;
-    transition: border-color 0.2s;
-    margin-bottom: 12px;
-}
-.role-card:hover { border-color: #4ECDC4; }
-.role-card .role-icon { font-size: 48px; margin-bottom: 16px; }
-.role-card h3 { color: #C8D8E8; font-size: 18px; font-weight: 600; margin: 0 0 8px; }
-.role-card p { color: #4A7FA0; font-size: 13px; margin: 0; line-height: 1.5; }
-
-.signal-card {
-    background: #0A1628;
-    border: 1px solid #1A2E4A;
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 16px;
-}
-.signal-card .signal-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: #4A7FA0;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-}
-.signal-card .signal-value {
-    font-size: 36px;
-    font-weight: 700;
-    color: #4ECDC4;
-}
-.signal-card .signal-unit {
-    font-size: 14px;
-    color: #4A7FA0;
-    margin-left: 4px;
-}
-.signal-card .signal-desc {
-    font-size: 13px;
-    color: #8BA8C4;
-    margin-top: 8px;
-    line-height: 1.5;
-}
-
 .section-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
-    color: #4ECDC4;
+    color: #1E90D4;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     margin-bottom: 8px;
-}
-.section-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #C8D8E8;
-    margin-bottom: 20px;
+    font-weight: 500;
 }
 
 .coord-tag {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
-    color: #4A7FA0;
-    background: #0D1E30;
-    padding: 3px 8px;
-    border-radius: 4px;
-    border: 1px solid #1A2E4A;
+    color: #3A7FC4;
+    background: #EBF5FF;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #B0D8F0;
+}
+
+/* ── Wave decoration ── */
+.wave-divider {
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 4px;
+    margin: 12px 0;
+    opacity: 0.4;
 }
 </style>
 """
@@ -263,15 +213,15 @@ hr {
 st.markdown(STYLE, unsafe_allow_html=True)
 
 # =========================================
-# PLOTLY DARK THEME
+# PLOTLY LIGHT OCEAN THEME
 # =========================================
 PLOTLY_LAYOUT = dict(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="#060E1A",
-    font=dict(family="Space Grotesk", color="#8BA8C4", size=12),
-    xaxis=dict(gridcolor="#1A2E4A", zerolinecolor="#1A2E4A", color="#4A7FA0"),
-    yaxis=dict(gridcolor="#1A2E4A", zerolinecolor="#1A2E4A", color="#4A7FA0"),
-    title_font=dict(color="#C8D8E8", size=15),
+    paper_bgcolor="rgba(255,255,255,0.6)",
+    plot_bgcolor="rgba(235,248,255,0.5)",
+    font=dict(family="Plus Jakarta Sans", color="#3A6080", size=12),
+    xaxis=dict(gridcolor="#C8E8FF", zerolinecolor="#C8E8FF", color="#5A9EC8"),
+    yaxis=dict(gridcolor="#C8E8FF", zerolinecolor="#C8E8FF", color="#5A9EC8"),
+    title_font=dict(color="#1A3A5C", size=15, family="Plus Jakarta Sans"),
 )
 
 # =========================================
@@ -337,49 +287,181 @@ df["Fisheries_Index"] = (
 # =========================================
 if st.session_state.page == "home":
     st.markdown("""
-    <div class="hero-home">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4ECDC4;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px;">
-            ◈ SISTEM AKTIF · PERAIRAN LAUT ARAFURA · 4°S–12°S / 129°E–144°E
-        </div>
-        <h1>LAUTAN</h1>
-        <div class="tagline">Platform Intelijen Oseanografi Papua</div>
-        <div style="color:#4A7FA0;font-size:14px;max-width:520px;margin:0 auto;line-height:1.7;">
+    <div style="
+        background: linear-gradient(135deg, #1E90D4 0%, #0FB8D4 50%, #00D4AA 100%);
+        border-radius: 24px;
+        padding: 56px 40px 48px;
+        text-align: center;
+        margin-bottom: 36px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 40px rgba(30, 144, 212, 0.3);
+    ">
+        <!-- decorative circles -->
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.06);"></div>
+        <div style="position:absolute;bottom:-60px;left:-30px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
+
+        <div style="
+            display:inline-block;
+            background:rgba(255,255,255,0.18);
+            border:1px solid rgba(255,255,255,0.35);
+            border-radius:30px;
+            padding:5px 18px;
+            font-family:'DM Mono',monospace;
+            font-size:11px;
+            color:#FFFFFF;
+            letter-spacing:0.18em;
+            text-transform:uppercase;
+            margin-bottom:20px;
+        ">◈ SISTEM AKTIF · PERAIRAN LAUT ARAFURA · 4°S–12°S / 129°E–144°E</div>
+
+        <div style="font-size:72px;margin-bottom:4px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.2));">🌊</div>
+        <h1 style="
+            font-family:'Plus Jakarta Sans',sans-serif;
+            font-size:58px;
+            font-weight:800;
+            color:#FFFFFF;
+            letter-spacing:-0.03em;
+            margin:0 0 8px;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+        ">LAUTAN</h1>
+        <div style="
+            font-family:'DM Mono',monospace;
+            font-size:13px;
+            color:rgba(255,255,255,0.85);
+            letter-spacing:0.2em;
+            text-transform:uppercase;
+            margin-bottom:20px;
+        ">Platform Intelijen Oseanografi Papua</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:15px;max-width:520px;margin:0 auto;line-height:1.8;">
             Data klimatologi laut historis, real-time, dan proyeksi musiman<br>
             untuk kawasan perairan Papua & Laut Arafura.
         </div>
+
+        <!-- Stats row -->
+        <div style="display:flex;justify-content:center;gap:40px;margin-top:32px;flex-wrap:wrap;">
+            <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#FFFFFF;">20+</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;letter-spacing:0.1em;">TAHUN DATA</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,0.25);"></div>
+            <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#FFFFFF;">12</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;letter-spacing:0.1em;">PARAMETER</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,0.25);"></div>
+            <div style="text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#FFFFFF;">80×80</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.7);font-family:'DM Mono',monospace;letter-spacing:0.1em;">GRID SPASIAL</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Role cards
+    st.markdown("""
+    <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:#5A9EC8;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px;">Pilih Mode Tampilan</div>
+        <div style="font-size:22px;font-weight:700;color:#1A3A5C;">Siapa kamu hari ini? 👋</div>
     </div>
     """, unsafe_allow_html=True)
 
     c1, c2 = st.columns(2, gap="large")
     with c1:
         st.markdown("""
-        <div class="role-card">
-            <div class="role-icon">🎣</div>
-            <h3>Nelayan Lokal</h3>
-            <p>Peta zona tangkap, kondisi gelombang, dan rekomendasi area melaut hari ini.</p>
+        <div style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #EBF8FF 100%);
+            border: 2px solid #7EC8F0;
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(30, 144, 212, 0.10);
+            transition: all 0.2s;
+        ">
+            <div style="font-size:56px;margin-bottom:16px;">🎣</div>
+            <h3 style="color:#1A3A5C;font-size:20px;font-weight:700;margin:0 0 10px;">Nelayan Lokal</h3>
+            <p style="color:#4A8EC4;font-size:14px;margin:0;line-height:1.6;">
+                Peta zona tangkap, kondisi gelombang, dan rekomendasi area melaut hari ini.
+            </p>
+            <div style="margin-top:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+                <span style="background:#EBF8FF;color:#1E90D4;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #B0D8F0;">Zona Tangkap</span>
+                <span style="background:#EBF8FF;color:#1E90D4;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #B0D8F0;">Gelombang</span>
+                <span style="background:#EBF8FF;color:#1E90D4;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #B0D8F0;">Arus</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Masuk sebagai Nelayan →", use_container_width=True, key="btn_nelayan"):
+        if st.button("🎣  Masuk sebagai Nelayan", use_container_width=True, key="btn_nelayan"):
             st.session_state.role = "nelayan"
             st.session_state.page = "dashboard"
             st.rerun()
 
     with c2:
         st.markdown("""
-        <div class="role-card">
-            <div class="role-icon">🔬</div>
-            <h3>Akademisi / Peneliti</h3>
-            <p>12 parameter oseanografi, time series 20 tahun, matriks korelasi, dan analisis spasial.</p>
+        <div style="
+            background: linear-gradient(135deg, #FFFFFF 0%, #FFF6EB 100%);
+            border: 2px solid #FAC87A;
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: center;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 20px rgba(245, 166, 35, 0.10);
+            transition: all 0.2s;
+        ">
+            <div style="font-size:56px;margin-bottom:16px;">🔬</div>
+            <h3 style="color:#1A3A5C;font-size:20px;font-weight:700;margin:0 0 10px;">Akademisi / Peneliti</h3>
+            <p style="color:#4A8EC4;font-size:14px;margin:0;line-height:1.6;">
+                12 parameter oseanografi, time series 20 tahun, matriks korelasi, dan analisis spasial.
+            </p>
+            <div style="margin-top:16px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+                <span style="background:#FFF6EB;color:#C07A10;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #FAC87A;">Analisis</span>
+                <span style="background:#FFF6EB;color:#C07A10;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #FAC87A;">Korelasi</span>
+                <span style="background:#FFF6EB;color:#C07A10;font-size:11px;padding:3px 10px;border-radius:20px;font-family:'DM Mono',monospace;border:1px solid #FAC87A;">Time Series</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Masuk sebagai Akademisi →", use_container_width=True, key="btn_akademisi"):
+        if st.button("🔬  Masuk sebagai Akademisi", use_container_width=True, key="btn_akademisi"):
             st.session_state.role = "akademisi"
             st.session_state.page = "dashboard"
             st.rerun()
 
+    # Credit team
     st.markdown("""
-    <div style="text-align:center;margin-top:48px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#1A3050;letter-spacing:0.1em;">
+    <div style="
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5FAFF 100%);
+        border: 1.5px solid #C8E8FF;
+        border-radius: 20px;
+        padding: 28px 32px;
+        text-align: center;
+        margin-top: 32px;
+        box-shadow: 0 2px 12px rgba(30,120,200,0.07);
+    ">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#1E90D4;text-transform:uppercase;letter-spacing:0.18em;margin-bottom:16px;">✨ Tim Pengembang</div>
+        <div style="display:flex;justify-content:center;gap:32px;flex-wrap:wrap;">
+            <div style="text-align:center;">
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1E90D4,#0FB8D4);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(30,144,212,0.3);">👩‍💻</div>
+                <div style="font-weight:700;color:#1A3A5C;font-size:14px;">Ratu Salwa Ghazalia Hade</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#5A9EC8;margin-top:2px;">12923016</div>
+            </div>
+            <div style="width:1.5px;background:linear-gradient(180deg,transparent,#C8E8FF,transparent);"></div>
+            <div style="text-align:center;">
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0FB8D4,#00D4AA);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(0,180,160,0.3);">👩‍🔬</div>
+                <div style="font-weight:700;color:#1A3A5C;font-size:14px;">Diandra Aulia Ramadhani</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#5A9EC8;margin-top:2px;">12923021</div>
+            </div>
+            <div style="width:1.5px;background:linear-gradient(180deg,transparent,#C8E8FF,transparent);"></div>
+            <div style="text-align:center;">
+                <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#00D4AA,#1E90D4);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(0,212,170,0.3);">🌊</div>
+                <div style="font-weight:700;color:#1A3A5C;font-size:14px;">Mutiara Nurani</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:#5A9EC8;margin-top:2px;">12923023</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="text-align:center;margin-top:28px;">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#A8CBDF;letter-spacing:0.1em;">
             DATA SUMBER: CMEMS · MODIS-Aqua · ERA5 · BMKG · 2001–2026
         </div>
     </div>
@@ -391,11 +473,10 @@ if st.session_state.page == "home":
 # =========================================
 with st.sidebar:
     st.markdown("""
-    <div style="padding:16px 0 8px;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4ECDC4;letter-spacing:0.15em;text-transform:uppercase;">
-            ◈ LAUTAN
-        </div>
-        <div style="font-size:13px;color:#4A7FA0;margin-top:2px;">Ocean Intelligence Platform</div>
+    <div style="padding:16px 0 8px;text-align:center;">
+        <div style="font-size:32px;margin-bottom:6px;">🌊</div>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:#1E90D4;letter-spacing:0.1em;text-transform:uppercase;">LAUTAN</div>
+        <div style="font-size:12px;color:#5A9EC8;margin-top:2px;">Ocean Intelligence Platform</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -442,27 +523,34 @@ with st.sidebar:
 
     if st.session_state.role == "akademisi":
         PARAM_LABELS = {
-            "Ocean_Health_Index": "Ocean Health Index",
-            "Fisheries_Index": "Fisheries Index",
-            "sst": "Sea Surface Temp (SST)",
-            "ssta": "SST Anomali",
-            "ph": "pH Laut",
-            "do": "Dissolved Oxygen",
-            "salinitas": "Salinitas",
-            "chla": "Klorofil-a",
-            "current_speed": "Kecepatan Arus",
-            "gelombang": "Tinggi Gelombang",
-            "angin_u": "Angin Zonal (U)",
-            "angin_v": "Angin Meridional (V)",
+            "Ocean_Health_Index": "🌊 Ocean Health Index",
+            "Fisheries_Index": "🐟 Fisheries Index",
+            "sst": "🌡️ Sea Surface Temp (SST)",
+            "ssta": "📈 SST Anomali",
+            "ph": "⚗️ pH Laut",
+            "do": "💧 Dissolved Oxygen",
+            "salinitas": "🧂 Salinitas",
+            "chla": "🟢 Klorofil-a",
+            "current_speed": "🌀 Kecepatan Arus",
+            "gelombang": "🌊 Tinggi Gelombang",
+            "angin_u": "💨 Angin Zonal (U)",
+            "angin_v": "💨 Angin Meridional (V)",
         }
+        parameter_raw = {k: k for k in PARAM_LABELS}
         parameter = st.selectbox("PARAMETER RISET", list(PARAM_LABELS.keys()),
                                   format_func=lambda x: PARAM_LABELS[x])
 
     st.markdown(f"""
-    <div style="padding:12px 0 0;">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#1A3050;">
-            4°S – 12°S / 129°E – 144°E<br>
-            Laut Arafura · Papua
+    <div style="
+        background:linear-gradient(135deg,#EBF8FF,#F0FFFE);
+        border:1.5px solid #B0D8F0;
+        border-radius:10px;
+        padding:12px 14px;
+        margin-top:12px;
+    ">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;letter-spacing:0.08em;">
+            📍 4°S – 12°S / 129°E – 144°E<br>
+            🌏 Laut Arafura · Papua
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -541,9 +629,9 @@ df_map = build_spatial_grid(val_uo_base, val_vo_base)
 def render_map(df_map, z_col, colorscale, height=520):
     fig = px.density_mapbox(
         df_map, lat="lat", lon="lon", z=z_col,
-        radius=35, opacity=0.78, zoom=4.8,
+        radius=35, opacity=0.80, zoom=4.8,
         color_continuous_scale=colorscale,
-        mapbox_style="carto-darkmatter",   # dark basemap = jauh lebih bagus!
+        mapbox_style="carto-positron",
         range_color=[float(df_map[z_col].quantile(0.03)), float(df_map[z_col].quantile(0.97))]
     )
     fig.update_layout(
@@ -553,10 +641,10 @@ def render_map(df_map, z_col, colorscale, height=520):
         paper_bgcolor="rgba(0,0,0,0)",
         coloraxis_colorbar=dict(
             thickness=12, len=0.65,
-            bgcolor="rgba(6,14,26,0.8)",
-            bordercolor="#1A2E4A",
-            tickfont=dict(color="#4A7FA0", size=10, family="JetBrains Mono"),
-            title=dict(font=dict(color="#4A7FA0", size=10, family="JetBrains Mono"))
+            bgcolor="rgba(255,255,255,0.85)",
+            bordercolor="#C8E8FF",
+            tickfont=dict(color="#3A6080", size=10, family="DM Mono"),
+            title=dict(font=dict(color="#3A6080", size=10, family="DM Mono"))
         )
     )
     return fig
@@ -567,71 +655,83 @@ def render_map(df_map, z_col, colorscale, height=520):
 if st.session_state.role == "nelayan":
     mean_fsi = df_map['Fisheries_Index'].mean()
 
-    if mean_fsi > 73: status_color = "#00C48C"; status_text = "SANGAT BAIK"; status_icon = "●"
-    elif mean_fsi > 55: status_color = "#4ECDC4"; status_text = "NORMAL"; status_icon = "●"
-    else: status_color = "#F5A623"; status_text = "WASPADA"; status_icon = "◆"
+    if mean_fsi > 73: status_color = "#00C48C"; status_text = "SANGAT BAIK"; status_icon = "✅"; status_bg = "#F0FFF8"; status_border = "#A8E8D0"
+    elif mean_fsi > 55: status_color = "#1E90D4"; status_text = "NORMAL"; status_icon = "🌊"; status_bg = "#EBF8FF"; status_border = "#7EC8F0"
+    else: status_color = "#F5A623"; status_text = "WASPADA"; status_icon = "⚠️"; status_bg = "#FFF8E8"; status_border = "#FAC87A"
 
     st.markdown(f"""
     <div class="ocean-header">
-        <div class="subtitle">Dashboard Nelayan · {mode} · {waktu_label}</div>
+        <div class="subtitle">🎣 Dashboard Nelayan · {mode} · {waktu_label}</div>
         <h1>Peta Zona Tangkap — Laut Arafura</h1>
     </div>
     """, unsafe_allow_html=True)
 
-    # Status bar
     col_s1, col_s2, col_s3, col_s4 = st.columns([2,1,1,1])
     with col_s1:
         st.markdown(f"""
-        <div style="background:#0A1628;border:1px solid {status_color}33;border-radius:10px;padding:16px 20px;border-left:3px solid {status_color};">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A7FA0;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Status Zona Melaut</div>
+        <div style="
+            background:{status_bg};
+            border:2px solid {status_border};
+            border-radius:14px;
+            padding:18px 22px;
+            border-left:5px solid {status_color};
+            box-shadow:0 2px 12px rgba(30,120,200,0.08);
+        ">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Status Zona Melaut</div>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span style="color:{status_color};font-size:20px;">{status_icon}</span>
-                <span style="color:{status_color};font-size:20px;font-weight:700;letter-spacing:0.05em;">{status_text}</span>
-                <span style="font-family:'JetBrains Mono',monospace;color:#4A7FA0;font-size:13px;">({mean_fsi:.1f}/100)</span>
+                <span style="font-size:24px;">{status_icon}</span>
+                <span style="color:{status_color};font-size:22px;font-weight:800;letter-spacing:0.03em;">{status_text}</span>
+                <span style="font-family:'DM Mono',monospace;color:#8ABDD4;font-size:13px;">({mean_fsi:.1f}/100)</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
     with col_s2:
-        st.metric("Potensi Ikan", f"{mean_fsi:.0f}", "/ 100")
+        st.metric("🐟 Potensi Ikan", f"{mean_fsi:.0f}", "/ 100")
     with col_s3:
-        st.metric("Tinggi Gelombang", f"{df_map['gelombang'].mean():.2f}", "meter")
+        st.metric("🌊 Tinggi Gelombang", f"{df_map['gelombang'].mean():.2f}", "meter")
     with col_s4:
-        st.metric("Kec. Arus", f"{df_map['current_speed'].mean():.3f}", "m/s")
+        st.metric("🌀 Kec. Arus", f"{df_map['current_speed'].mean():.3f}", "m/s")
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
-    # Map
-    st.markdown("""<div class="section-label">PETA DISTRIBUSI SPASIAL · FISHERIES INDEX</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="section-label">🗺️ PETA DISTRIBUSI SPASIAL · FISHERIES INDEX</div>""", unsafe_allow_html=True)
     if not df_map.empty:
         st.plotly_chart(render_map(df_map, "Fisheries_Index", "Turbo"), use_container_width=True)
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # Rekomendasi
     col_r1, col_r2 = st.columns(2)
     with col_r1:
-        st.markdown("""<div class="section-label">REKOMENDASI ZONA</div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="section-label">💡 REKOMENDASI ZONA</div>""", unsafe_allow_html=True)
         if mean_fsi > 73:
-            st.success("🟢 Area merah/oranye di peta sangat direkomendasikan. Nutrisi laut melimpah — turunkan jaring di perairan dalam Arafura.")
+            st.success("🟢 **Area merah/oranye di peta sangat direkomendasikan!** Nutrisi laut melimpah — turunkan jaring di perairan dalam Arafura.")
         elif mean_fsi > 55:
-            st.info("🔵 Kondisi normal. Ikan bergerak mengikuti arus permukaan — ikuti arah arus ke tenggara.")
+            st.info("🔵 **Kondisi normal.** Ikan bergerak mengikuti arus permukaan — ikuti arah arus ke tenggara.")
         else:
-            st.warning("🟡 Tangkapan rendah. Disarankan memancing di pesisir dekat teluk dan muara sungai.")
+            st.warning("🟡 **Tangkapan rendah.** Disarankan memancing di pesisir dekat teluk dan muara sungai.")
 
     with col_r2:
-        st.markdown("""<div class="section-label">KONDISI PERAIRAN SAAT INI</div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="section-label">🌊 KONDISI PERAIRAN SAAT INI</div>""", unsafe_allow_html=True)
         chla_mean = df_map['chla'].mean()
         do_mean = df_map['do'].mean()
         st.markdown(f"""
-        <div style="background:#0A1628;border:1px solid #1A2E4A;border-radius:8px;padding:16px;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                <div>
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A7FA0;">KLOROFIL-A</div>
-                    <div style="font-size:20px;font-weight:700;color:#4ECDC4;">{chla_mean:.3f} <span style="font-size:12px;color:#4A7FA0;">mg/m³</span></div>
+        <div style="
+            background:linear-gradient(135deg,#FFFFFF,#EBF8FF);
+            border:1.5px solid #B0D8F0;
+            border-radius:14px;
+            padding:20px;
+            box-shadow:0 2px 12px rgba(30,120,200,0.07);
+        ">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="text-align:center;">
+                    <div style="font-size:28px;margin-bottom:6px;">🟢</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;text-transform:uppercase;letter-spacing:0.08em;">Klorofil-a</div>
+                    <div style="font-size:22px;font-weight:700;color:#1A3A5C;">{chla_mean:.3f} <span style="font-size:12px;color:#5A9EC8;">mg/m³</span></div>
                 </div>
-                <div>
-                    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A7FA0;">DISSOLVED O₂</div>
-                    <div style="font-size:20px;font-weight:700;color:#4ECDC4;">{do_mean:.2f} <span style="font-size:12px;color:#4A7FA0;">mg/L</span></div>
+                <div style="text-align:center;">
+                    <div style="font-size:28px;margin-bottom:6px;">💧</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;text-transform:uppercase;letter-spacing:0.08em;">Dissolved O₂</div>
+                    <div style="font-size:22px;font-weight:700;color:#1A3A5C;">{do_mean:.2f} <span style="font-size:12px;color:#5A9EC8;">mg/L</span></div>
                 </div>
             </div>
         </div>
@@ -641,23 +741,37 @@ if st.session_state.role == "nelayan":
 # DASHBOARD — AKADEMISI
 # =========================================
 else:
+    PARAM_LABELS_CLEAN = {
+        "Ocean_Health_Index": "Ocean Health Index",
+        "Fisheries_Index": "Fisheries Index",
+        "sst": "Sea Surface Temp (SST)",
+        "ssta": "SST Anomali",
+        "ph": "pH Laut",
+        "do": "Dissolved Oxygen",
+        "salinitas": "Salinitas",
+        "chla": "Klorofil-a",
+        "current_speed": "Kecepatan Arus",
+        "gelombang": "Tinggi Gelombang",
+        "angin_u": "Angin Zonal (U)",
+        "angin_v": "Angin Meridional (V)",
+    }
+
     st.markdown(f"""
     <div class="ocean-header">
-        <div class="subtitle">Portal Akademisi · {mode} · {waktu_label}</div>
-        <h1>Analisis Parameter — <span style="color:#4ECDC4;">{parameter}</span></h1>
+        <div class="subtitle">🔬 Portal Akademisi · {mode} · {waktu_label}</div>
+        <h1>Analisis Parameter — <span style="color:#1E90D4;">{PARAM_LABELS_CLEAN.get(parameter, parameter)}</span></h1>
     </div>
     """, unsafe_allow_html=True)
 
-    # Metric row
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Rata-Rata", f"{df_map[parameter].mean():.3f}")
-    col2.metric("Minimum",   f"{df_map[parameter].min():.3f}")
-    col3.metric("Maksimum",  f"{df_map[parameter].max():.3f}")
-    col4.metric("Std. Dev",  f"{df_map[parameter].std():.3f}")
+    col1.metric("📊 Rata-Rata", f"{df_map[parameter].mean():.3f}")
+    col2.metric("⬇️ Minimum",   f"{df_map[parameter].min():.3f}")
+    col3.metric("⬆️ Maksimum",  f"{df_map[parameter].max():.3f}")
+    col4.metric("📉 Std. Dev",  f"{df_map[parameter].std():.3f}")
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["  🗺 Spasial  ", "  📈 Time Series  ", "  📊 Statistik  ", "  🔥 Korelasi  "])
+    tab1, tab2, tab3, tab4 = st.tabs(["  🗺️ Spasial  ", "  📈 Time Series  ", "  📊 Statistik  ", "  🔥 Korelasi  "])
 
     with tab1:
         cmap_dict = {
@@ -668,73 +782,88 @@ else:
             'current_speed':'Teal',
         }
         cmap = cmap_dict.get(parameter, "Icefire")
-        st.markdown(f"""<div class="section-label">DISTRIBUSI SPASIAL · {parameter.upper()}</div>""", unsafe_allow_html=True)
+        st.markdown(f"""<div class="section-label">📍 DISTRIBUSI SPASIAL · {parameter.upper()}</div>""", unsafe_allow_html=True)
         st.plotly_chart(render_map(df_map, parameter, cmap, height=500), use_container_width=True)
         st.markdown(f"""
-        <div style="display:flex;gap:8px;margin-top:4px;">
-            <span class="coord-tag">4°S – 12°S</span>
-            <span class="coord-tag">129°E – 144°E</span>
-            <span class="coord-tag">Grid 80×80 · Interpolasi Smooth</span>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <span class="coord-tag">📍 4°S – 12°S</span>
+            <span class="coord-tag">📍 129°E – 144°E</span>
+            <span class="coord-tag">🔲 Grid 80×80 · Interpolasi Smooth</span>
         </div>
         """, unsafe_allow_html=True)
 
     with tab2:
         df_ts = df.groupby('time')[parameter].mean().reset_index()
-        # Tambah trend line
         z = np.polyfit(range(len(df_ts)), df_ts[parameter], 1)
         p = np.poly1d(z)
 
         fig_ts = go.Figure()
         fig_ts.add_trace(go.Scatter(
             x=df_ts['time'], y=df_ts[parameter],
-            mode='lines', name=parameter,
-            line=dict(color='#4ECDC4', width=1.5),
-            fill='tozeroy', fillcolor='rgba(78,205,196,0.06)'
+            mode='lines', name=PARAM_LABELS_CLEAN.get(parameter, parameter),
+            line=dict(color='#1E90D4', width=2),
+            fill='tozeroy', fillcolor='rgba(30,144,212,0.08)'
         ))
         fig_ts.add_trace(go.Scatter(
             x=df_ts['time'], y=p(range(len(df_ts))),
             mode='lines', name='Tren Linear',
-            line=dict(color='#F5A623', width=1.5, dash='dot')
+            line=dict(color='#F5A623', width=2, dash='dot')
         ))
         fig_ts.update_layout(
             **PLOTLY_LAYOUT,
-            title=f"Tren Temporal 2001–2020 · {parameter}",
-            legend=dict(font=dict(color="#4A7FA0", size=11), bgcolor="rgba(0,0,0,0)"),
+            title=f"Tren Temporal 2001–2020 · {PARAM_LABELS_CLEAN.get(parameter, parameter)}",
+            legend=dict(font=dict(color="#3A6080", size=11), bgcolor="rgba(255,255,255,0.8)", bordercolor="#C8E8FF", borderwidth=1),
             height=400,
         )
         st.plotly_chart(fig_ts, use_container_width=True)
 
     with tab3:
         desc = df_map[[parameter]].describe()
-        st.markdown("""<div class="section-label">STATISTIK DESKRIPTIF · AREA SPASIAL AKTIF</div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="section-label">📐 STATISTIK DESKRIPTIF · AREA SPASIAL AKTIF</div>""", unsafe_allow_html=True)
 
         stats_cols = st.columns(4)
         stats_items = [
-            ("Count", f"{int(desc.loc['count', parameter]):,}"),
-            ("Mean",  f"{desc.loc['mean', parameter]:.4f}"),
-            ("Std",   f"{desc.loc['std', parameter]:.4f}"),
-            ("Min",   f"{desc.loc['min', parameter]:.4f}"),
+            ("Count", f"{int(desc.loc['count', parameter]):,}", "🔢"),
+            ("Mean",  f"{desc.loc['mean', parameter]:.4f}", "📊"),
+            ("Std",   f"{desc.loc['std', parameter]:.4f}", "📉"),
+            ("Min",   f"{desc.loc['min', parameter]:.4f}", "⬇️"),
         ]
-        for i, (label, val) in enumerate(stats_items):
+        for i, (label, val, icon) in enumerate(stats_items):
             stats_cols[i].markdown(f"""
-            <div style="background:#0A1628;border:1px solid #1A2E4A;border-radius:8px;padding:16px;text-align:center;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A7FA0;letter-spacing:0.1em;text-transform:uppercase;">{label}</div>
-                <div style="font-size:22px;font-weight:700;color:#4ECDC4;margin-top:4px;">{val}</div>
+            <div style="
+                background:linear-gradient(135deg,#FFFFFF,#EBF8FF);
+                border:1.5px solid #B0D8F0;
+                border-radius:12px;
+                padding:18px;
+                text-align:center;
+                box-shadow:0 2px 8px rgba(30,120,200,0.07);
+            ">
+                <div style="font-size:22px;margin-bottom:6px;">{icon}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;letter-spacing:0.1em;text-transform:uppercase;">{label}</div>
+                <div style="font-size:20px;font-weight:700;color:#1A3A5C;margin-top:4px;">{val}</div>
             </div>
             """, unsafe_allow_html=True)
 
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
         stats_cols2 = st.columns(3)
         stats_items2 = [
-            ("25th Percentile", f"{desc.loc['25%', parameter]:.4f}"),
-            ("Median (50%)",    f"{desc.loc['50%', parameter]:.4f}"),
-            ("75th Percentile", f"{desc.loc['75%', parameter]:.4f}"),
+            ("25th Percentile", f"{desc.loc['25%', parameter]:.4f}", "📦"),
+            ("Median (50%)",    f"{desc.loc['50%', parameter]:.4f}", "⚖️"),
+            ("75th Percentile", f"{desc.loc['75%', parameter]:.4f}", "📦"),
         ]
-        for i, (label, val) in enumerate(stats_items2):
+        for i, (label, val, icon) in enumerate(stats_items2):
             stats_cols2[i].markdown(f"""
-            <div style="background:#0A1628;border:1px solid #1A2E4A;border-radius:8px;padding:16px;text-align:center;">
-                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#4A7FA0;letter-spacing:0.1em;text-transform:uppercase;">{label}</div>
-                <div style="font-size:22px;font-weight:700;color:#4ECDC4;margin-top:4px;">{val}</div>
+            <div style="
+                background:linear-gradient(135deg,#FFFFFF,#F0FAFF);
+                border:1.5px solid #B0D8F0;
+                border-radius:12px;
+                padding:18px;
+                text-align:center;
+                box-shadow:0 2px 8px rgba(30,120,200,0.07);
+            ">
+                <div style="font-size:22px;margin-bottom:6px;">{icon}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:#5A9EC8;letter-spacing:0.1em;text-transform:uppercase;">{label}</div>
+                <div style="font-size:20px;font-weight:700;color:#1A3A5C;margin-top:4px;">{val}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -742,12 +871,15 @@ else:
         numeric_df = df.select_dtypes(include=np.number).drop(columns=['year','month'], errors='ignore')
         fig_corr = px.imshow(
             numeric_df.corr(), text_auto=".2f",
-            color_continuous_scale=[[0,"#1A3050"],[0.5,"#060E1A"],[1,"#4ECDC4"]],
+            color_continuous_scale=[[0,"#EBF8FF"],[0.5,"#7EC8F0"],[1,"#1A3A8C"]],
             title="Matriks Korelasi Pearson — Semua Parameter"
         )
         fig_corr.update_layout(
-            **PLOTLY_LAYOUT,
+            paper_bgcolor="rgba(255,255,255,0.6)",
+            plot_bgcolor="rgba(235,248,255,0.5)",
+            font=dict(family="Plus Jakarta Sans", color="#3A6080", size=12),
+            title_font=dict(color="#1A3A5C", size=15),
             height=480,
         )
-        fig_corr.update_traces(textfont=dict(size=9, color="#8BA8C4"))
+        fig_corr.update_traces(textfont=dict(size=9, color="#1A3A5C"))
         st.plotly_chart(fig_corr, use_container_width=True)
