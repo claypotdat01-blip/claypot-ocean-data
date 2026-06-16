@@ -107,6 +107,7 @@ html, body, [class*="css"] {
 }
 hr { border-color: #D6E4F0 !important; }
 
+/* Back button on sidebar — force high contrast */
 [data-testid="stSidebar"] .stButton > button {
     background: #FFFFFF !important;
     color: #0D1F33 !important;
@@ -247,10 +248,10 @@ df["Ocean_Health_Index"] = (
 ) * 100
 
 df["Fisheries_Index"] = (
-    0.35 * normalisasi_global(df["chla"],  0.05, 0.8) +
-    0.25 * normalisasi_global(df["do"],    4.5, 7.5) +
-    0.20 * normalisasi_global(df["current_speed"], 0.0, 0.25) +
-    0.20 * (1 - normalisasi_global(df["gelombang"], 0.2, 2.5))
+    0.35 * normalisasi_global(df["chla"],        0.05, 0.8) +
+    0.25 * normalisasi_global(df["do"],           4.5, 7.5) +
+    0.20 * normalisasi_global(df["current_speed"],0.0, 0.25) +
+    0.20 * (1 - normalisasi_global(df["gelombang"],0.2, 2.5))
 ) * 100
 
 # =========================================
@@ -283,8 +284,8 @@ if st.session_state.page == "home":
     </div>
     <div style="width:1px;background:#1E3A5C;"></div>
     <div style="text-align:center;">
-      <div style="font-size:32px;font-weight:800;color:#FFFFFF;letter-spacing:-0.02em;">50×50</div>
-      <div style="font-size:10px;color:#7BAFD4;font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;margin-top:4px;">GRID DOS MATRIX</div>
+      <div style="font-size:32px;font-weight:800;color:#FFFFFF;letter-spacing:-0.02em;">100×100</div>
+      <div style="font-size:10px;color:#7BAFD4;font-family:'JetBrains Mono',monospace;letter-spacing:0.12em;margin-top:4px;">GRID SPASIAL</div>
     </div>
   </div>
 </div>
@@ -389,7 +390,7 @@ with st.sidebar:
 
     if mode == "Historis":
         tahun = st.selectbox("TAHUN", sorted(df["year"].unique(), reverse=True))
-        breakdown = st.sidebar.radio("RESOLUSI WAKTU", ["Bulanan", "Musiman"])
+        breakdown = st.radio("RESOLUSI WAKTU", ["Bulanan", "Musiman"])
         musim_map_dict = {
             "Musim Barat":   [12, 1, 2],
             "Peralihan I":   [3, 4, 5],
@@ -455,32 +456,41 @@ with st.sidebar:
 """, unsafe_allow_html=True)
 
 # =========================================
-# LAND MASK (REVISI SUPER PRECOOS: KUNCI TOTAL DARI DARATAN)
+# LAND MASK
 # =========================================
 def is_land(lat, lon):
-    # Kuncian Batas Astronomis Pesisir Pantai Selatan Papua Utama
-    if lon >= 134.0 and lat > -4.5: return True
-    if lon >= 135.5 and lat > -5.2: return True
-    if lon >= 137.0 and lat > -6.0: return True
-    if lon >= 138.5 and lat > -7.0: return True
-    if lon >= 140.0 and lat > -8.0: return True
-    if lon >= 141.0 and lat > -8.3: return True
-    
-    # Kuncian Poligon Pulau Yos Sudarso / Dolak secara presisi
-    if 137.3 <= lon <= 139.3 and -8.4 <= lat <= -7.1: return True
-    
-    # Kuncian Kepulauan Aru
-    if 134.0 <= lon <= 135.2 and -7.1 <= lat <= -5.5: return True
+    # ── Pulau Papua (bentang utama) ──
+    # Kepala Burung (Semenanjung Doberai)
+    if lon < 132.5 and lat > -2.0: return True
+    if lon < 133.5 and lat > -3.0: return True
+    if lon < 134.5 and lat > -3.5: return True
+    # Badan utama Papua barat
+    if lon < 136.0 and lat > -4.0: return True
+    if lon < 137.0 and lat > -4.5: return True
+    if lon < 138.0 and lat > -5.0: return True
+    if lon < 139.0 and lat > -5.5: return True
+    if lon < 140.0 and lat > -6.0: return True
+    if lon < 141.0 and lat > -6.5: return True
+    if lon < 141.5 and lat > -7.0: return True
+    # Ekor Papua (timur)
+    if lon >= 141.0 and lon < 142.0 and lat > -8.5: return True
+    if lon >= 140.0 and lon < 141.0 and lat > -8.0: return True
+    # Teluk Cenderawasih (daratan pesisir utara)
+    if lon > 135.0 and lon < 139.0 and lat > -3.5 and lat < -1.0: return True
+    # ── Pulau-pulau kecil sekitar ──
+    # Kep. Aru
+    if lon > 133.5 and lon < 135.5 and lat > -7.5 and lat < -5.5: return True
+    # Pulau Yos Sudarso / Dolak
+    if lon > 137.5 and lon < 139.5 and lat > -8.5 and lat < -7.0: return True
     return False
 
 # =========================================
-# SPATIAL GRID (50x50 MATRIX DOTS RAPAT)
+# SPATIAL GRID
 # =========================================
 @st.cache_data
 def build_spatial_grid(val_uo_base, val_vo_base, month_seed, year_seed):
-    # Diubah ke grid 50x50 agar menghasilkan formasi matriks titik yang sangat padat dan estetik
-    lat_grid = np.linspace(-12.0, -4.0, 50)
-    lon_grid = np.linspace(129.0, 144.0, 50)
+    lat_grid = np.linspace(-12.0, -4.5, 80)
+    lon_grid = np.linspace(130.0, 144.0, 100)
     lon_g, lat_g = np.meshgrid(lon_grid, lat_grid)
     lat_flat = lat_g.flatten()
     lon_flat = lon_g.flatten()
@@ -549,25 +559,24 @@ active_year  = int(df_filter_base["year"].mean())   if not df_filter_base.empty 
 
 df_map = build_spatial_grid(val_uo_base, val_vo_base, active_month, active_year)
 
-# 🌟 REVISI FORMAT PETA: Menggunakan scatter_mapbox (Dot Matrix Rapat) ber-style Carto Positron agar bersih dari darat
-def render_map(df_map, z_col, colorscale, height=540):
+def render_map(df_map, z_col, colorscale, height=520):
     fig = px.scatter_mapbox(
         df_map, lat="lat", lon="lon", color=z_col,
         color_continuous_scale=colorscale,
-        opacity=0.95,
-        zoom=4.8,
-        range_color=[float(df_map[z_col].quantile(0.02)), float(df_map[z_col].quantile(0.98))],
+        opacity=0.85,
+        zoom=4.5,
+        size_max=6,
+        range_color=[float(df_map[z_col].quantile(0.03)), float(df_map[z_col].quantile(0.97))],
         mapbox_style="carto-positron",
     )
-    # Ukuran marker diperbesar tipis (size=4.8) agar formasi dot matrix menutup rapat perairan
-    fig.update_traces(marker=dict(size=4.8))
+    fig.update_traces(marker=dict(size=4.5))
     fig.update_layout(
-        mapbox=dict(center=dict(lat=-8.2, lon=136.5)),
+        mapbox=dict(center=dict(lat=-8.5, lon=137.0)),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
         height=height,
         paper_bgcolor="rgba(0,0,0,0)",
         coloraxis_colorbar=dict(
-            thickness=13, len=0.65,
+            thickness=12, len=0.65,
             bgcolor="rgba(255,255,255,0.95)",
             bordercolor="#D6E4F0",
             tickfont=dict(color="#3A5070", size=10, family="JetBrains Mono"),
@@ -580,14 +589,21 @@ def render_map(df_map, z_col, colorscale, height=540):
 # ROSE DIAGRAM HELPERS
 # =========================================
 def make_wind_rose(df_src, title="Rose Diagram Angin"):
+    """Wind rose dari komponen u/v angin."""
     if df_src.empty:
         return go.Figure()
+    # Hitung kecepatan dan arah angin dari komponen u/v
     speed = np.sqrt(df_src["angin_u"]**2 + df_src["angin_v"]**2)
-    direction_rad = np.arctan2(-df_src["angin_u"], -df_src["angin_v"])
+    # Arah dari: arah DATANG angin (meteorological convention: arah dari mana angin datang)
+    direction_rad = np.arctan2(-df_src["angin_u"], -df_src["angin_v"])  # arah datang
     direction_deg = (np.degrees(direction_rad) + 360) % 360
 
+    # Bin 16 arah
     n_bins = 16
     bin_edges = np.linspace(0, 360, n_bins + 1)
+    bin_labels = [f"{int(b)}°" for b in bin_edges[:-1]]
+
+    # Klasifikasi kecepatan
     speed_bins = [0, 2, 4, 6, 8, 100]
     speed_labels = ["<2 m/s", "2–4 m/s", "4–6 m/s", "6–8 m/s", ">8 m/s"]
     colors_wind = ["#A8C8E8","#5A9EC8","#1E6BB8","#0D3D6B","#031420"]
@@ -624,9 +640,11 @@ def make_wind_rose(df_src, title="Rose Diagram Angin"):
     return fig
 
 def make_wave_rose(df_src, title="Rose Diagram Gelombang"):
+    """Wave rose dari komponen arus sebagai proxy arah gelombang."""
     if df_src.empty:
         return go.Figure()
     speed = df_src["gelombang"]
+    # Arah gelombang dari arah arus permukaan sebagai proxy
     direction_rad = np.arctan2(df_src["uo"], df_src["vo"])
     direction_deg = (np.degrees(direction_rad) + 360) % 360
 
@@ -667,7 +685,13 @@ def make_wave_rose(df_src, title="Rose Diagram Gelombang"):
     )
     return fig
 
+# =========================================
+# FISHERIES STATUS — pakai FSI dari df_map
+# (rentang nyata 10–100; threshold disesuaikan)
+# =========================================
 def get_fisheries_status(fsi_val):
+    # FSI dari grid spasial nilainya bervariasi 10–100
+    # Threshold disesuaikan dengan distribusi nyata data
     p25 = df_map["Fisheries_Index"].quantile(0.25)
     p75 = df_map["Fisheries_Index"].quantile(0.75)
     if fsi_val >= p75:
@@ -683,7 +707,7 @@ def get_fisheries_status(fsi_val):
 if st.session_state.role == "nelayan":
     mean_fsi  = float(df_map["Fisheries_Index"].mean())
     status    = get_fisheries_status(mean_fsi)
-    fsi_abs   = f"{mean_fsi:.1f}"
+    fsi_abs   = f"{mean_fsi:.1f}"  # nilai aktual untuk tampil
 
     st.markdown(f"""
 <div class="page-header">
@@ -712,14 +736,17 @@ if st.session_state.role == "nelayan":
         st.metric("Kec. Arus", f"{df_map['current_speed'].mean():.3f}", "m/s")
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-    st.markdown('<div class="section-label">PETA SPASIAL FORMASI DOT MATRIX · FISHERIES INDEX</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-label">PETA DISTRIBUSI SPASIAL · FISHERIES INDEX</div>', unsafe_allow_html=True)
     if not df_map.empty:
         st.plotly_chart(render_map(df_map, "Fisheries_Index", "Turbo"), use_container_width=True)
 
     st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
+    # Rose diagrams untuk nelayan
     st.markdown('<div class="section-label">ROSE DIAGRAM — ANGIN & GELOMBANG</div>', unsafe_allow_html=True)
     rc1, rc2 = st.columns(2)
     with rc1:
+        # Gunakan data time series yang di-filter untuk rose diagram
         df_rose_src = df_filter_base if not df_filter_base.empty else df
         st.plotly_chart(make_wind_rose(df_rose_src, f"Arah & Kecepatan Angin · {waktu_label}"), use_container_width=True)
     with rc2:
@@ -798,12 +825,12 @@ else:
             'current_speed': 'Teal',
         }
         cmap = cmap_dict.get(parameter, "Icefire")
-        st.markdown(f'<div class="section-label">DISTRIBUSI DOT MATRIX SPASIAL · {parameter.upper()}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-label">DISTRIBUSI SPASIAL · {parameter.upper()}</div>', unsafe_allow_html=True)
         st.plotly_chart(render_map(df_map, parameter, cmap, height=500), use_container_width=True)
         st.markdown(f"""
 <span class="coord-tag">4°S – 12°S</span>
 <span class="coord-tag">129°E – 144°E</span>
-<span class="coord-tag">Formasi Grid Rapat 50×50 · Laut Arafura</span>
+<span class="coord-tag">Grid 100×80 · Laut Arafura</span>
 """, unsafe_allow_html=True)
 
     with tab2:
@@ -815,7 +842,8 @@ else:
         fig_ts.add_trace(go.Scatter(
             x=df_ts["time"], y=df_ts[parameter],
             mode="lines", name=PARAM_LABELS_CLEAN.get(parameter, parameter),
-            line=dict(color="#1E6BB8", width=2.0)
+            line=dict(color="#1E6BB8", width=1.8),
+            fill="tozeroy", fillcolor="rgba(30,107,184,0.07)"
         ))
         fig_ts.add_trace(go.Scatter(
             x=df_ts["time"], y=p_fn(range(len(df_ts))),
@@ -824,12 +852,11 @@ else:
         ))
         fig_ts.update_layout(
             **PLOTLY_LAYOUT,
-            title=f"Tren Temporal Jangka Panjang (2001–2020) · {PARAM_LABELS_CLEAN.get(parameter, parameter)}",
+            title=f"Tren Temporal 2001–2020 · {PARAM_LABELS_CLEAN.get(parameter, parameter)}",
             legend=dict(font=dict(color="#3A5070", size=11), bgcolor="rgba(255,255,255,0.9)",
                         bordercolor="#D6E4F0", borderwidth=1),
-            height=420,
+            height=400,
         )
-        fig_ts.update_yaxis(autorange=True)
         st.plotly_chart(fig_ts, use_container_width=True)
 
     with tab3:
@@ -869,27 +896,26 @@ else:
         fig_corr = px.imshow(
             numeric_df.corr(), text_auto=".2f",
             color_continuous_scale=[[0,"#EBF3FB"],[0.5,"#5A9EC8"],[1,"#0D1F33"]],
-            title="Matriks Korelasi Pearson — Komparasi Antar Parameter"
+            title="Matriks Korelasi Pearson — Semua Parameter"
         )
         fig_corr.update_layout(
             paper_bgcolor="#FFFFFF",
             plot_bgcolor="#F2F6FA",
-            font=dict(family="Inter", color="#3A5070", size=11),
+            font=dict(family="Inter", color="#3A5070", size=12),
             title_font=dict(color="#0D1F33", size=14),
-            height=600,
-            margin=dict(l=50, r=20, t=50, b=50)
+            height=480,
         )
-        fig_corr.update_traces(textfont=dict(size=8, color="#0D1F33"))
+        fig_corr.update_traces(textfont=dict(size=9, color="#0D1F33"))
         st.plotly_chart(fig_corr, use_container_width=True)
 
     with tab5:
-        st.markdown('<div class="section-label">ROSE DIAGRAM MURNI — DINAMIKA ATMOSFER DAN GELOMBANG LAUT ARAFURA</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-label">ROSE DIAGRAM — DISTRIBUSI ARAH & INTENSITAS</div>', unsafe_allow_html=True)
         df_rose_src = df_filter_base if not df_filter_base.empty else df
         rc1, rc2 = st.columns(2)
         with rc1:
-            st.plotly_chart(make_wind_rose(df_rose_src, f"Arah & Kecepatan Angin Murni · {waktu_label}"), use_container_width=True)
+            st.plotly_chart(make_wind_rose(df_rose_src, f"Arah & Kecepatan Angin · {waktu_label}"), use_container_width=True)
         with rc2:
-            st.plotly_chart(make_wave_rose(df_rose_src, f"Arah & Tinggi Gelombang Murni · {waktu_label}"), use_container_width=True)
+            st.plotly_chart(make_wave_rose(df_rose_src, f"Arah & Tinggi Gelombang · {waktu_label}"), use_container_width=True)
         st.markdown("""
 <div class="data-note">Rose diagram dibangun dari komponen angin zonal (U) dan meridional (V) menggunakan konvensi meteorologis (arah dari mana angin datang). Arah gelombang menggunakan proxy arah arus permukaan (uo, vo).</div>
 """, unsafe_allow_html=True)
