@@ -2,11 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import datetime
 
 st.set_page_config(page_title="Platform Informasi & Prediksi Klimatologi Oseanografi", layout="wide")
 
-# CSS TEMA PREMIUM KHAS ORDERAN AWAL MUTIA
+# CSS TEMA PREMIUM SEMPURNA
 st.markdown("""
     <style>
         .stApp { background-color: #F4F7FA; }
@@ -15,7 +14,6 @@ st.markdown("""
         [data-testid="stSidebar"] { background-color: #086982 !important; color: white !important; }
         [data-testid="stSidebar"] .stMarkdown p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] label { color: white !important; }
         
-        /* Tombol Toska Khas Halaman Utama */
         .stButton>button { 
             background-color: #00C4DF !important; 
             color: white !important; 
@@ -62,7 +60,6 @@ if st.session_state['page'] == 'welcome':
 else:
     role = st.session_state['role']
     
-    # --- NAVIGATION & SIDEBAR ---
     st.sidebar.markdown("### 🏠 Navigasi Utama")
     if st.sidebar.button("✨ Kembali ke Menu Utama (Home)", use_container_width=True):
         st.session_state['page'] = 'welcome'; st.rerun()
@@ -70,22 +67,28 @@ else:
     st.sidebar.write("---")
     st.sidebar.markdown("### ⚙️ Konfigurasi Filter Analisis")
     
-    # Dropdown Pilih Matriks Indeks
+    # 🌟 PERBAIKAN LOGIKA DROPDOWN MATRIKS (Biar Gak Dobel Sesuai Gambar)
     if role == 'masyarakat':
-        matriks_opsi = ["🐟 Fisheries Index (Potensi Zona Tangkap Ikan)"]
+        matriks_pilih = st.sidebar.selectbox(
+            "📊 Pilih Matriks Indeks Riset:", 
+            ["🐟 Fisheries Index (Potensi Zona Tangkap Ikan)"]
+        )
         var_matriks = 'Fisheries_Index'
     else:
-        matriks_opsi = ["🩺 Ocean Health Index (Halpern et al.)"]
-        var_matriks = 'Ocean_Health_Index'
+        matriks_pilih = st.sidebar.selectbox(
+            "📊 Pilih Matriks Indeks Riset:", 
+            ["🩺 Ocean Health Index (Halpern et al.)", "🌊 Sea Surface Temperature (SST) Anomaly"]
+        )
+        if "Ocean Health" in matriks_pilih:
+            var_matriks = 'Ocean_Health_Index'
+        else:
+            var_matriks = 'SST_Anomaly'
         
-    st.sidebar.selectbox("📊 Pilih Matriks Indeks Riset:", matriks_opsi)
     st.sidebar.write("---")
     
-    # 🌟 TRIPLE DROPDOWN MODE: Historis, Real-Time, & Prediksi
     mode_analisis = st.sidebar.selectbox("Pilih Mode Analisis:", 
                                          ["📊 Analisis Data Historis", "🌐 Analisis Real-Time", "🔮 Analisis Prediksi Model"])
     
-    # Filter Dinamis Waktu Berdasarkan Mode Analisis
     if mode_analisis == "📊 Analisis Data Historis":
         daftar_tahun = [str(t) for t in range(2020, 2000, -1)]
         tahun_pilih = st.sidebar.selectbox("Pilih Tahun:", daftar_tahun)
@@ -102,35 +105,37 @@ else:
         st.sidebar.info("📅 Mode Satelit Aktif: Sinkronisasi harian otomatis pada tanggal hari ini.")
         tahun_pilih = "2026"
         breakdown = "Harian"
+        waktu_sub = "Juni"
         
-    else: # Mode Prediksi
+    else:
         st.sidebar.warning("🔮 Mode Proyeksi: Menggunakan Algoritma Autoregresif Iklim 2026.")
         tahun_pilih = "2026"
         bulan_pred = st.sidebar.selectbox("Pilih Target Bulan Prediksi:", ["Juli 2026", "Agustus 2026", "September 2026", "Desember 2026"])
         breakdown = "Prediksi"
+        waktu_sub = bulan_pred
 
-    # --- JALUR DATA SPASIAL MAPS (Otomatis Bersih & Land Masking Papua) ---
-    lat = np.linspace(-12, -2, 50)
-    lon = np.linspace(129, 142, 50)
+    # --- 🌊 OPTIMASI PETA DAN PERBAIKAN GRAFIK TERPOTONG ---
+    lat = np.linspace(-12, -2, 60)
+    lon = np.linspace(129, 142, 60)
     lon_g, lat_g = np.meshgrid(lon, lat)
     
-    mask_daratan = (lon_g > 136) & (lat_g > -8)
+    # Formula melengkung alami (Linear Equation Boundary) agar potongan peta tidak patah siku-siku
+    mask_daratan = (lat_g > 0.85 * lon_g - 124) & (lon_g > 134)
     
-    # Membuat variasi nilai peta agar dinamis mengikuti pilihan filter
-    if mode_analisis == "📊 Analisis Data Historis":
-        seed_val = int(tahun_pilih) + (10 if breakdown == "Musiman" else 5)
-    elif mode_analisis == "🌐 Analisis Real-Time":
-        seed_val = 2026
+    seed_base = int(tahun_pilih) if mode_analisis == "📊 Analisis Data Historis" else 2026
+    np.random.seed(seed_base)
+    
+    # Skala nilai disesuaikan secara otomatis berdasarkan parameter indeks yang dipilih
+    if var_matriks == 'Fisheries_Index':
+        v_base = 74.0 + np.sin(lon_g / 3.0) * 4.0 + np.cos(lat_g / 2.0) * 3.0
+    elif var_matriks == 'Ocean_Health_Index':
+        v_base = 78.5 + np.cos(lon_g / 4.0) * 5.0 + np.sin(lat_g / 3.0) * 2.0
     else:
-        seed_val = 2027 # Variasi khusus prediksi
+        v_base = 0.5 + np.sin(lon_g / 2.0) * 1.5 # Variasi anomali suhu sekitar -1 s.d 2 derajat
         
-    np.random.seed(seed_val)
-    v_base = 73.5 + np.random.uniform(4, 9) + np.sin(lon_g / 5.0) * 6.0
     v_base[mask_daratan] = np.nan
-    
     df_map = pd.DataFrame({'lat': lat_g.flatten(), 'lon': lon_g.flatten(), var_matriks: v_base.flatten()}).dropna()
 
-    # --- LAYOUT UTAMA DASHBOARD ---
     st.markdown(f"## 📊 Dashboard Analisis Spasial - {mode_analisis}")
     
     tab1, tab2 = st.tabs(["🗺️ Pemetaan Spasial Kontur", "📈 Analisis Runtun Waktu (Trend & Prediction)"])
@@ -141,7 +146,7 @@ else:
         elif mode_analisis == "🌐 Analisis Real-Time":
             st.markdown(f"#### 🌐 Kondisi Riil Aliran Satelit Spasial Per tanggal: `16 Juni 2026`")
         else:
-            st.markdown(f"#### 🔮 Peta Proyeksi Spasial Lapisan Atas Perairan - Target: {bulan_pred}")
+            st.markdown(f"#### 🔮 Peta Proyeksi Spasial Lapisan Atas Perairan - Target: {waktu_sub}")
             
         col_m1, col_m2 = st.columns(2)
         col_m1.metric("Spatial Mean Index", f"{df_map[var_matriks].mean():.3f}")
@@ -150,7 +155,7 @@ else:
         fig_map = px.scatter_mapbox(
             df_map, lat="lat", lon="lon", color=var_matriks,
             size=np.ones(len(df_map))*4, zoom=5.1,
-            color_continuous_scale="Jet" if role == 'masyarakat' else "Blues",
+            color_continuous_scale="Jet" if var_matriks == 'Fisheries_Index' else "Blues" if var_matriks == 'Ocean_Health_Index' else "Coolwarm",
             mapbox_style="open-street-map"
         )
         fig_map.update_layout(margin={"r":0,"t":20,"l":0,"b":0}, height=550)
@@ -158,14 +163,13 @@ else:
 
     with tab2:
         try:
-            # Menggunakan File CSV Ekstraksi Hasil Olahan Laptop Kamu
+            # Membaca File CSV Rangkuman Hasil Olahan Laptop Kamu
             df_ts = pd.read_csv("rangkuman_historis_20tahun.csv")
             df_ts['time'] = pd.to_datetime(df_ts['time'])
             
             kolom_asal = [c for c in df_ts.columns if c != 'time'][0]
             df_ts = df_ts.rename(columns={kolom_asal: var_matriks})
 
-            # 📊 LOGIKA GRAFIK KATEGORI 1: DATA HISTORIS (2001-2020)
             if mode_analisis == "📊 Analisis Data Historis":
                 if breakdown == "Bulanan":
                     df_plot = df_ts.set_index('time').resample('ME').mean().reset_index()
@@ -178,9 +182,7 @@ else:
                 fig_ts = px.line(df_plot, x='time', y=var_matriks, title=judul_g)
                 fig_ts.update_traces(line_color='#086982', line_width=2)
 
-            # 🌐 LOGIKA GRAFIK KATEGORI 2: REAL-TIME (Tahun 2026 Berjalan)
             elif mode_analisis == "🌐 Analisis Real-Time":
-                # Generasi data deret waktu harian untuk tahun berjalan (2026) hingga hari ini
                 dates_rt = pd.date_range(start="2026-01-01", end="2026-06-16", freq="D")
                 np.random.seed(42)
                 values_rt = 79.5 + np.sin(np.arange(len(dates_rt)) / 10) * 3.0 + np.random.normal(0, 0.5, len(dates_rt))
@@ -190,9 +192,7 @@ else:
                 fig_ts = px.line(df_rt, x='time', y=var_matriks, title=f"Aliran Grafik Data Operasional Real-Time Jalur Satelit (2026)")
                 fig_ts.update_traces(line_color='#00C4DF', line_width=2.5)
 
-            # 🔮 LOGIKA GRAFIK KATEGORI 3: PREDIKSI MASA DEPAN (Proyeksi Akhir 2026)
             else:
-                # Membuat data masa lalu pendek + garis proyeksi ke depan
                 dates_past = pd.date_range(start="2025-01-01", end="2026-06-16", freq="ME")
                 dates_future = pd.date_range(start="2026-06-17", end="2026-12-31", freq="ME")
                 
