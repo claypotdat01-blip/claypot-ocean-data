@@ -459,21 +459,29 @@ with st.sidebar:
 # LAND MASK
 # =========================================
 def is_land(lat, lon):
-    if lon < 132.0 and lat > -6.5: return True
-    if lon < 133.5 and lat > -5.5: return True
-    if lon < 134.5 and lat > -5.0: return True
-    if lon < 136.0 and lat > -4.5: return True
-    if lon < 138.0 and lat > -4.2: return True
-    if lon < 139.0 and lat > -4.3: return True
-    if lon < 140.0 and lat > -4.5: return True
-    if lon < 141.0 and lat > -5.0: return True
-    if lon < 141.5 and lat > -5.5: return True
-    if lon > 140.5 and lon < 141.5 and lat > -8.0 and lat < -5.5: return True
-    if lon < 131.5 and lat > -5.0: return True
-    if lon < 130.5 and lat > -6.5: return True
-    if lat > -5.8 and lon > 136.0 and lon < 138.5: return True
-    if lat > -6.2 and lon > 137.5 and lon < 139.5: return True
-    if lat > -6.8 and lon > 139.0 and lon < 141.0: return True
+    # ── Pulau Papua (bentang utama) ──
+    # Kepala Burung (Semenanjung Doberai)
+    if lon < 132.5 and lat > -2.0: return True
+    if lon < 133.5 and lat > -3.0: return True
+    if lon < 134.5 and lat > -3.5: return True
+    # Badan utama Papua barat
+    if lon < 136.0 and lat > -4.0: return True
+    if lon < 137.0 and lat > -4.5: return True
+    if lon < 138.0 and lat > -5.0: return True
+    if lon < 139.0 and lat > -5.5: return True
+    if lon < 140.0 and lat > -6.0: return True
+    if lon < 141.0 and lat > -6.5: return True
+    if lon < 141.5 and lat > -7.0: return True
+    # Ekor Papua (timur)
+    if lon >= 141.0 and lon < 142.0 and lat > -8.5: return True
+    if lon >= 140.0 and lon < 141.0 and lat > -8.0: return True
+    # Teluk Cenderawasih (daratan pesisir utara)
+    if lon > 135.0 and lon < 139.0 and lat > -3.5 and lat < -1.0: return True
+    # ── Pulau-pulau kecil sekitar ──
+    # Kep. Aru
+    if lon > 133.5 and lon < 135.5 and lat > -7.5 and lat < -5.5: return True
+    # Pulau Yos Sudarso / Dolak
+    if lon > 137.5 and lon < 139.5 and lat > -8.5 and lat < -7.0: return True
     return False
 
 # =========================================
