@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="OCEANA — Ocean Intelligence Platform",
+    page_title="LAUTAN — Ocean Intelligence Platform",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -405,10 +405,16 @@ with st.sidebar:
             idx_bulan = bln_list.index(bulan) + 1
             df_filter_base = df_filter_base[df_filter_base["month"] == idx_bulan]
             waktu_label = f"{bulan} {tahun}"
+            ts_months = [idx_bulan]              # time series: bulan ini, lintas tahun
+            ts_highlight_year = tahun
+            ts_scope_label = f"Bulan {bulan}"
         else:
             musim_pilih = st.selectbox("MUSIM", list(musim_map_dict.keys()))
             df_filter_base = df_filter_base[df_filter_base["month"].isin(musim_map_dict[musim_pilih])]
             waktu_label = f"{musim_pilih} {tahun}"
+            ts_months = musim_map_dict[musim_pilih]   # time series: musim ini, lintas tahun
+            ts_highlight_year = tahun
+            ts_scope_label = musim_pilih
 
     elif mode == "Real Time":
         st.markdown("""
@@ -416,6 +422,9 @@ with st.sidebar:
 """, unsafe_allow_html=True)
         df_filter_base = df[df["month"] == 6].copy()
         waktu_label = "Juni 2026 (Est.)"
+        ts_months = [6]
+        ts_highlight_year = None
+        ts_scope_label = "Bulan Juni"
     else:
         st.markdown("""
 <div class="data-note">⚠ Proyeksi musiman berbasis regresi klimatologis 2001–2020. Bukan model NWP/GCM.</div>
@@ -425,6 +434,9 @@ with st.sidebar:
         idx_p = 7 if "Juli" in bulan_pred else 8 if "Agustus" in bulan_pred else 9 if "September" in bulan_pred else 12
         df_filter_base = df[df["month"] == idx_p].copy()
         waktu_label = f"Proyeksi {bulan_pred}"
+        ts_months = [idx_p]
+        ts_highlight_year = None
+        ts_scope_label = f"Bulan {bulan_pred.split()[0]}"
 
     st.markdown("---")
 
@@ -889,47 +901,65 @@ else:
 """, unsafe_allow_html=True)
 
     with tab2:
-        df_ts = df.groupby("time")[parameter].mean().reset_index()
+        # Time series MENGIKUTI filter sidebar: hanya bulan/musim yang dipilih,
+        # ditampilkan lintas seluruh tahun (rata-rata per tahun). Tahun yang dipilih
+        # (mode Historis) ditandai garis vertikal merah.
+        df_ts_src = df[df["month"].isin(ts_months)].copy()
+        df_ts = (df_ts_src.groupby("year")[parameter].mean()
+                 .reset_index().sort_values("year"))
+        x_year = df_ts["year"].to_numpy()
         y_vals = df_ts[parameter].to_numpy(dtype=float)
-        z = np.polyfit(range(len(df_ts)), y_vals, 1)
-        p_fn = np.poly1d(z)
-        y_trend = p_fn(range(len(df_ts)))
 
-        # Rentang sumbu-Y dikunci pada sebaran NYATA seluruh data parameter ini
-        # (gabungan garis data 2001-2020 + garis tren). TIDAK pernah dimulai dari 0.
-        y_lo = float(min(y_vals.min(), y_trend.min()))
-        y_hi = float(max(y_vals.max(), y_trend.max()))
+        has_trend = len(df_ts) >= 2
+        if has_trend:
+            z = np.polyfit(range(len(df_ts)), y_vals, 1)
+            y_trend = np.poly1d(z)(range(len(df_ts)))
+        else:
+            y_trend = y_vals
+
+        # Sumbu-Y mengikuti sebaran data terpilih (tidak dari 0).
+        y_lo = float(min(y_vals.min(), np.min(y_trend)))
+        y_hi = float(max(y_vals.max(), np.max(y_trend)))
         span = y_hi - y_lo
         pad = span * 0.08 if span > 0 else (abs(y_hi) * 0.08 if y_hi != 0 else 1.0)
         y_floor, y_ceil = y_lo - pad, y_hi + pad
 
         fig_ts = go.Figure()
-        # Garis data (tanpa fill apa pun -> tidak ada yang bisa menarik sumbu ke 0).
         fig_ts.add_trace(go.Scatter(
-            x=df_ts["time"], y=y_vals,
-            mode="lines", name=PARAM_LABELS_CLEAN.get(parameter, parameter),
-            line=dict(color="#1E6BB8", width=1.8),
+            x=x_year, y=y_vals,
+            mode="lines+markers", name=PARAM_LABELS_CLEAN.get(parameter, parameter),
+            line=dict(color="#1E6BB8", width=1.8), marker=dict(size=5),
         ))
-        # Garis tren linear.
-        fig_ts.add_trace(go.Scatter(
-            x=df_ts["time"], y=y_trend,
-            mode="lines", name="Tren Linear",
-            line=dict(color="#D4811A", width=2, dash="dot")
-        ))
+        if has_trend:
+            fig_ts.add_trace(go.Scatter(
+                x=x_year, y=y_trend,
+                mode="lines", name="Tren Linear",
+                line=dict(color="#D4811A", width=2, dash="dot")
+            ))
+        # Tandai tahun yang dipilih di sidebar (hanya mode Historis).
+        if ts_highlight_year is not None and ts_highlight_year in set(x_year.tolist()):
+            fig_ts.add_vline(x=ts_highlight_year,
+                             line=dict(color="#C0392B", width=1.5, dash="dash"))
+            fig_ts.add_annotation(
+                x=ts_highlight_year, y=y_ceil, text=f"{ts_highlight_year}",
+                showarrow=False, yanchor="bottom",
+                font=dict(color="#C0392B", size=11, family="JetBrains Mono"))
+
         fig_ts.update_layout(
             **PLOTLY_LAYOUT,
-            title=f"Tren Temporal 2001–2020 · {PARAM_LABELS_CLEAN.get(parameter, parameter)}",
+            title=(f"Tren Antar-Tahun · {PARAM_LABELS_CLEAN.get(parameter, parameter)} "
+                   f"· {ts_scope_label}"),
             legend=dict(font=dict(color="#3A5070", size=11), bgcolor="rgba(255,255,255,0.9)",
                         bordercolor="#D6E4F0", borderwidth=1),
             height=400,
         )
-        # KUNCI sumbu-Y: autorange dimatikan + range eksplisit -> mustahil tampil 0..8.
+        fig_ts.update_xaxes(title_text="Tahun", dtick=2)
         fig_ts.update_yaxes(range=[y_floor, y_ceil], autorange=False)
         st.plotly_chart(fig_ts, use_container_width=True)
-        # Penanda versi + bukti skala: kalau baris ini muncul, kamu menjalankan versi terbaru.
         st.caption(
-            f"✓ Skala sumbu-Y otomatis: {y_floor:.3f} – {y_ceil:.3f}  ·  "
-            f"mengikuti sebaran data {PARAM_LABELS_CLEAN.get(parameter, parameter)} (bukan dari 0)"
+            f"✓ Mengikuti sidebar — Mode: {mode} · Cakupan: {ts_scope_label}"
+            + (f" · tahun ditandai: {ts_highlight_year}" if ts_highlight_year is not None else "")
+            + f"  ·  skala-Y {y_floor:.3f}–{y_ceil:.3f}"
         )
 
     with tab3:
