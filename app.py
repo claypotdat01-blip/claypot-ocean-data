@@ -9,6 +9,11 @@ st.set_page_config(
     layout="wide"
 )
 
+# 🌟 FUNGSI DEFINISI TARUH PALING ATAS AGAR TIDAK EROR NAMEERROR
+def normalisasi_global(series, vmin, vmax):
+    if (vmax - vmin) == 0: return series * 0
+    return (series - vmin) / (vmax - vmin)
+
 # =========================================
 # 1. INITIALIZE SESSION STATE
 # =========================================
@@ -25,13 +30,12 @@ def load_data():
     try:
         df_data = pd.read_csv("rangkuman_historis_20tahun.csv")
     except:
-        # Buat dataframe darurat jika file csv tidak terbaca sama sekali
         dates_fallback = pd.date_range(start="2001-01-01", end="2020-12-01", freq="MS")
         df_data = pd.DataFrame({"time": dates_fallback})
         
     df_data["time"] = pd.to_datetime(df_data["time"])
     
-    # KUNCI INTEGRASI: Pastikan semua kolom parameter mentah terdefinisi sejak awal di dalam fungsi load
+    # Deteksi dan amankan parameter mentah jika kolom tidak langsung ada di CSV
     if "uo" not in df_data.columns: df_data["uo"] = -0.05
     if "vo" not in df_data.columns: df_data["vo"] = -0.01
     if "sst" not in df_data.columns: df_data["sst"] = 28.5 + (df_data["uo"] * 5)
@@ -46,7 +50,6 @@ def load_data():
     
     return df_data
 
-# Eksekusi fungsi load data secara aman
 df = load_data()
 
 # Ekstraksi Kalender Temporal
@@ -54,24 +57,20 @@ df["year"] = df["time"].dt.year
 df["month"] = df["time"].dt.month
 df["current_speed"] = np.sqrt(df["uo"]**2 + df["vo"]**2)
 
-def normalize_global(series, vmin, vmax):
-    if (vmax - vmin) == 0: return series * 0
-    return (series - vmin) / (vmax - vmin)
-
-# Kalkulasi Indeks Rerata Jangka Panjang untuk suplai grafik temporal
+# Kalkulasi Indeks Rerata Jangka Panjang untuk suplai grafik
 df["Ocean_Health_Index"] = (
-    0.25 * normalize_global(df["do"], 5.0, 7.0) +
-    0.20 * normalize_global(df["ph"], 8.0, 8.3) +
-    0.20 * normalize_global(df["chla"], 0.1, 0.4) +
-    0.15 * normalize_global(df["salinitas"], 33.5, 35.0) +
-    0.20 * (1 - normalize_global(df["gelombang"], 0.4, 1.5))
+    0.25 * normalisasi_global(df["do"], 5.0, 7.0) +
+    0.20 * normalisasi_global(df["ph"], 8.0, 8.3) +
+    0.20 * normalisasi_global(df["chla"], 0.1, 0.4) +
+    0.15 * normalisasi_global(df["salinitas"], 33.5, 35.0) +
+    0.20 * (1 - normalisasi_global(df["gelombang"], 0.4, 1.5))
 ) * 100
 
 df["Fisheries_Index"] = (
-    0.35 * normalize_global(df["chla"], 0.1, 0.4) +
-    0.25 * normalize_global(df["do"], 5.0, 7.0) +
-    0.20 * normalize_global(df["current_speed"], 0.0, 0.2) +
-    0.20 * (1 - normalize_global(df["gelombang"], 0.4, 1.5))
+    0.35 * normalisasi_global(df["chla"], 0.1, 0.4) +
+    0.25 * normalisasi_global(df["do"], 5.0, 7.0) +
+    0.20 * normalisasi_global(df["current_speed"], 0.0, 0.2) +
+    0.20 * (1 - normalisasi_global(df["gelombang"], 0.4, 1.5))
 ) * 100
 
 # =========================================
@@ -166,7 +165,6 @@ for i in range(len(lat_flat)):
     t_lat = lat_flat[i]
     t_lon = lon_flat[i]
     
-    # Land masking daratan utama Papua
     if t_lon > 134.5 and (-5.5 < t_lat < -2.5): continue
     if t_lon > 136.2 and t_lat <= -5.5: continue
         
@@ -220,9 +218,7 @@ df_map = pd.DataFrame(records)
 # 6. RENDER KONTEN UTAMA DASHBOARD
 # =========================================
 
-# -----------------------------------------
-# A. LAYOUT NELAYAN
-# -----------------------------------------
+# --- A. LAYOUT NELAYAN ---
 if st.session_state.role == "nelayan":
     st.title("🐟 Dashboard Navigasi Nelayan - Perairan Papua")
     st.markdown(f"### 🗺️ Peta Potensi Zona Tangkap Ikan — Mode {mode} ({waktu_label})")
@@ -247,9 +243,7 @@ if st.session_state.role == "nelayan":
         else:
             st.warning(f"🟡 **STATUS: WASPADA TANGKAPAN RENDAH.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nSuhu permukaan laut berfluktuasi. Disarankan memancing di sekitar pesisir pantai dekat teluk.")
 
-# -----------------------------------------
-# B. LAYOUT AKADEMISI / PENELITI
-# -----------------------------------------
+# --- B. LAYOUT AKADEMISI ---
 else:
     st.title("🎓 Portal Akademisi & Riset Oseanografi Papua")
     
