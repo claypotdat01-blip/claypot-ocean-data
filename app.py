@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="OCEANA — Ocean Intelligence Platform",
+    page_title="LAUTAN — Ocean Intelligence Platform",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -267,7 +267,7 @@ if st.session_state.page == "home":
   <div style="display:inline-block;background:rgba(30,107,184,0.25);border:1px solid rgba(30,107,184,0.5);border-radius:4px;padding:4px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:#7BAFD4;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:28px;">
     SISTEM AKTIF · 4°S–12°S / 129°E–144°E · LAUT ARAFURA
   </div>
-  <h1 style="font-family:'Inter',sans-serif;font-size:72px;font-weight:800;color:#FFFFFF;letter-spacing:-0.04em;margin:0 0 6px;line-height:1;">OCEAN</h1>
+  <h1 style="font-family:'Inter',sans-serif;font-size:72px;font-weight:800;color:#FFFFFF;letter-spacing:-0.04em;margin:0 0 6px;line-height:1;">LAUTAN</h1>
   <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#7BAFD4;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:24px;">Platform Intelijen Oseanografi Papua</div>
   <div style="color:#A8C0D8;font-size:15px;max-width:500px;margin:0 auto 40px;line-height:1.8;">
     Data klimatologi laut historis dan proyeksi musiman<br>untuk kawasan perairan Papua &amp; Laut Arafura.
@@ -376,7 +376,7 @@ if st.session_state.page == "home":
 with st.sidebar:
     st.markdown("""
 <div style="padding:20px 0 12px;text-align:center;">
-  <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#FFFFFF;letter-spacing:0.12em;text-transform:uppercase;">OCEANA</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#FFFFFF;letter-spacing:0.12em;text-transform:uppercase;">LAUTAN</div>
   <div style="font-size:11px;color:#7BAFD4;margin-top:3px;letter-spacing:0.04em;">Ocean Intelligence Platform</div>
 </div>
 """, unsafe_allow_html=True)
@@ -958,9 +958,13 @@ else:
 """, unsafe_allow_html=True)
 
     with tab4:
-        numeric_df = df.select_dtypes(include=np.number).drop(columns=["year","month"], errors="ignore")
+        # Buang kolom non-parameter (koordinat & indeks waktu) supaya matriks bersih
+        # dan tidak kebanyakan kolom.
+        DROP_COLS = ["year", "month", "lat", "lon", "latitude", "longitude",
+                     "index", "time", "id"]
+        numeric_df = df.select_dtypes(include=np.number).drop(columns=DROP_COLS, errors="ignore")
 
-        # Label ringkas supaya sel lebih lega & angka tidak tumpang tindih.
+        # Label ringkas supaya sel lebih lega.
         SHORT_CORR = {
             "uo": "UO", "vo": "VO", "sst": "SST", "ssta": "SSTA",
             "ph": "pH", "do": "DO", "salinitas": "SAL", "chla": "CHL-a",
@@ -969,26 +973,52 @@ else:
             "Ocean_Health_Index": "OHI", "Fisheries_Index": "FSI",
         }
         corr = numeric_df.corr().rename(index=SHORT_CORR, columns=SHORT_CORR)
+        labels = list(corr.columns)
+        n = len(labels)
+        vals = corr.values
+        zmin, zmax = float(np.nanmin(vals)), float(np.nanmax(vals))
+        rng_z = (zmax - zmin) or 1.0
 
-        fig_corr = px.imshow(
-            corr, text_auto=".2f", aspect="auto",
-            color_continuous_scale=[[0,"#EBF3FB"],[0.5,"#5A9EC8"],[1,"#0D1F33"]],
-            title="Matriks Korelasi Pearson — Semua Parameter"
-        )
+        fig_corr = go.Figure(go.Heatmap(
+            z=vals, x=labels, y=labels,
+            colorscale=[[0, "#EBF3FB"], [0.5, "#5A9EC8"], [1, "#0D1F33"]],
+            zmin=zmin, zmax=zmax,
+            xgap=3, ygap=3,
+            hovertemplate="%{y} × %{x}: %{z:.2f}<extra></extra>",
+            colorbar=dict(thickness=12, len=0.7,
+                          tickfont=dict(size=10, family="JetBrains Mono", color="#0D1F33")),
+        ))
+
+        # Angka ditulis manual dengan warna teks ADAPTIF:
+        # putih di sel gelap, navy di sel terang -> selalu terbaca.
+        annotations = []
+        for i in range(n):          # baris (sumbu-y)
+            for j in range(n):      # kolom (sumbu-x)
+                v = vals[i, j]
+                frac = (v - zmin) / rng_z
+                txt_color = "#FFFFFF" if frac > 0.55 else "#0D1F33"
+                annotations.append(dict(
+                    x=labels[j], y=labels[i], text=f"{v:.2f}",
+                    showarrow=False,
+                    font=dict(size=10, color=txt_color, family="JetBrains Mono"),
+                ))
+
+        # Tinggi grafik menyesuaikan jumlah parameter -> sel besar, angka tidak tumpang tindih.
+        chart_h = max(560, 46 * n + 170)
         fig_corr.update_layout(
+            annotations=annotations,
+            title=dict(text="Matriks Korelasi Pearson — Parameter Oseanografi",
+                       font=dict(color="#0D1F33", size=15, family="Inter"), x=0.01),
             paper_bgcolor="#FFFFFF",
-            plot_bgcolor="#F2F6FA",
-            font=dict(family="Inter", color="#3A5070", size=12),
-            title_font=dict(color="#0D1F33", size=14),
-            height=660,
-            margin=dict(l=10, r=10, t=54, b=10),
-            coloraxis_colorbar=dict(thickness=12, len=0.7,
-                                    tickfont=dict(size=9, family="JetBrains Mono")),
+            plot_bgcolor="#FFFFFF",
+            height=chart_h,
+            margin=dict(l=10, r=10, t=60, b=10),
+            # Label sumbu dibuat gelap & lebih besar agar KONTRAS dengan latar terang.
+            xaxis=dict(tickangle=45, side="bottom",
+                       tickfont=dict(size=12, color="#0D1F33", family="Inter")),
+            yaxis=dict(autorange="reversed",
+                       tickfont=dict(size=12, color="#0D1F33", family="Inter")),
         )
-        # Sel diberi jarak, label dimiringkan, angka diperkecil agar muat tanpa tumpang tindih.
-        fig_corr.update_xaxes(tickangle=45, tickfont=dict(size=10, family="JetBrains Mono"))
-        fig_corr.update_yaxes(tickfont=dict(size=10, family="JetBrains Mono"))
-        fig_corr.update_traces(textfont=dict(size=9, color="#0D1F33"), xgap=2, ygap=2)
         st.plotly_chart(fig_corr, use_container_width=True)
 
     # Tab Rose Diagram hanya dibangun bila parameter yang dipilih bersifat terarah,
