@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Platform Informasi & Prediksi Klimatologi Oseanografi", layout="wide")
 
-# CSS TEMA PREMIUM MAHASISWA OSEANOGRAFI ITB
+# CSS PREMIUM TEMA SAMUDERA
 st.markdown("""
     <style>
         .stApp { background-color: #F4F7FA; }
@@ -15,7 +15,6 @@ st.markdown("""
         [data-testid="stSidebar"] { background-color: #086982 !important; color: white !important; }
         [data-testid="stSidebar"] .stMarkdown p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] label { color: white !important; }
         
-        /* Tombol Toska Sesuai Gambar Desain Awal Mutia */
         .stButton>button { 
             background-color: #00C4DF !important; 
             color: white !important; 
@@ -29,7 +28,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-if 'page' not in st.session_state: st.session_state['page'] = 'welcome'
+# Inisialisasi session state halaman dan role jika belum ada
+if 'page' not in st.session_state: 
+    st.session_state['page'] = 'welcome'
+if 'role' not in st.session_state:
+    st.session_state['role'] = 'akademisi'
 
 # ==========================================
 # 1. HALAMAN UTAMA (WELCOME PAGE)
@@ -42,46 +45,60 @@ if st.session_state['page'] == 'welcome':
     st.write("<br>", unsafe_allow_html=True)
     
     col_space1, col1, col_space2, col2, col_space3 = st.columns([1, 4, 1, 4, 1])
+    
     with col1:
         st.markdown("<div style='text-align: center;'><img src='https://cdn-icons-png.flaticon.com/512/2972/2972185.png' width='120'></div>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         if st.button("🧑‍🌾 MASUK SEBAGAI MASYARAKAT / NELAYAN LOKAL", use_container_width=True):
-            st.session_state['role'] = 'masyarakat'; st.session_state['page'] = 'dashboard'; st.rerun()
+            st.session_state['role'] = 'masyarakat'
+            st.session_state['page'] = 'dashboard'
+            st.rerun()
             
     with col2:
         st.markdown("<div style='text-align: center;'><img src='https://cdn-icons-png.flaticon.com/512/3135/3135810.png' width='120'></div>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         if st.button("🎓 MASUK SEBAGAI AKADEMISI / PENELITI SAINS", use_container_width=True):
-            st.session_state['role'] = 'akademisi'; st.session_state['page'] = 'dashboard'; st.rerun()
+            st.session_state['role'] = 'akademisi'
+            st.session_state['page'] = 'dashboard'
+            st.rerun()
 
 # ==========================================
-# 2. HALAMAN DASHBOARD UTAMA (MULTI-ROLE & TRIPLE-MODE)
+# 2. HALAMAN DASHBOARD INTERAKTIF
 # ==========================================
 else:
-    role = st.session_state['role']
+    current_role = st.session_state['role']
     
-    # NAVIGATION BAR
+    # --- SIDEBAR NAVIGASI & FILTER ---
     st.sidebar.markdown("### 🏠 Navigasi Utama")
     if st.sidebar.button("✨ Kembali ke Menu Utama (Home)", use_container_width=True):
-        st.session_state['page'] = 'welcome'; st.rerun()
+        st.session_state['page'] = 'welcome'
+        st.rerun()
         
     st.sidebar.write("---")
     st.sidebar.markdown("### ⚙️ Konfigurasi Filter Analisis")
     
-    # Filter Matriks Indeks Sesuai Gambar Rujukan Awal
-    if role == 'masyarakat':
-        matriks_pilih = st.sidebar.selectbox("📊 Pilih Matriks Indeks Riset:", ["🐟 Fisheries Index (Potensi Zona Tangkap Ikan)"])
+    # 🌟 KUNCI PERBAIKAN DROPDOWN SINKRON BERDASARKAN ROLE
+    if current_role == 'masyarakat':
+        matriks_pilih = st.sidebar.selectbox(
+            "📊 Pilih Matriks Indeks Riset:", 
+            ["🐟 Fisheries Index (Potensi Zona Tangkap Ikan)"]
+        )
         var_matriks = 'Fisheries_Index'
     else:
-        matriks_pilih = st.sidebar.selectbox("📊 Pilih Matriks Indeks Riset:", ["%🩺 Ocean Health Index (Halpern et al.)", "🌊 Sea Surface Temperature (SST) Anomaly"])
-        var_matriks = 'Ocean_Health_Index' if "Ocean Health" in matriks_pilih else 'SST_Anomaly'
+        matriks_pilih = st.sidebar.selectbox(
+            "📊 Pilih Matriks Indeks Riset:", 
+            ["🩺 Ocean Health Index (Halpern et al.)", "🌊 Sea Surface Temperature (SST) Anomaly"]
+        )
+        if "Ocean Health" in matriks_pilih:
+            var_matriks = 'Ocean_Health_Index'
+        else:
+            var_matriks = 'SST_Anomaly'
         
     st.sidebar.write("---")
     
-    # Dropdown Tiga Mode Analisis (Historis, Real-Time, Prediksi)
-    mode_analisis = st.sidebar.selectbox("Pilih Mode Analisis:", ["📊 Analisis Data Historis", "🌐 Analisis Real-Time", "🔮 Analisis Prediksi Model"])
+    mode_analisis = st.sidebar.selectbox("Pilih Mode Analisis:", 
+                                         ["📊 Analisis Data Historis", "🌐 Analisis Real-Time", "🔮 Analisis Prediksi Model"])
     
-    # Filter Waktu Dinamis
     if mode_analisis == "📊 Analisis Data Historis":
         daftar_tahun = [str(t) for t in range(2020, 2000, -1)]
         tahun_pilih = st.sidebar.selectbox("Pilih Tahun:", daftar_tahun)
@@ -93,13 +110,11 @@ else:
         else:
             musim_list = ["Musim Barat (DJF)", "Peralihan I (MAM)", "Musim Timur (JJA)", "Peralihan II (SON)"]
             waktu_sub = st.sidebar.selectbox("Pilih Musim:", musim_list)
-    
     elif mode_analisis == "🌐 Analisis Real-Time":
         st.sidebar.info("📅 Mode Satelit Aktif: Sinkronisasi harian otomatis pada tanggal hari ini.")
         tahun_pilih = "2026"
         breakdown = "Harian"
         waktu_sub = "Juni"
-        
     else:
         st.sidebar.warning("🔮 Mode Proyeksi: Menggunakan Algoritma Autoregresif Iklim 2026.")
         tahun_pilih = "2026"
@@ -107,75 +122,65 @@ else:
         breakdown = "Prediksi"
         waktu_sub = bulan_pred
 
-    # --- GENERASI DATA SPASIAL & FORMULA MASKING DARATAN PAPUA ---
-    lat = np.linspace(-12, -2, 60)
-    lon = np.linspace(129, 142, 60)
+    # --- 🌊 FORMULA MATRIX SPASIAL BARU (GEOGRAPHIC BOUNDS - ANTI FREAK) ---
+    # Membuat grid koordinat membentang rapi mengelilingi perairan pulau Papua
+    lat = np.linspace(-9.0, -2.0, 50)
+    lon = np.linspace(130.0, 141.0, 50)
     lon_g, lat_g = np.meshgrid(lon, lat)
     
-    # Batas linier melengkung alami agar daratan Papua bersih rapi dari titik data grid
-    mask_daratan = (lat_g > 0.85 * lon_g - 124) & (lon_g > 134)
+    # Land Masking sederhana untuk menyembunyikan titik data di atas area pulau utama Papua
+    mask_daratan = (lat_g > -6.0) & (lon_g > 135.0)
     
     np.random.seed(int(tahun_pilih))
     if var_matriks == 'Fisheries_Index':
-        v_base = 73.0 + np.sin(lon_g / 3.0) * 4.0 + np.cos(lat_g / 2.0) * 3.0 + np.random.normal(0, 0.5, lon_g.shape)
+        v_base = 72.5 + np.sin(lon_g / 2.5) * 5.0 + np.cos(lat_g / 1.5) * 3.5 + np.random.normal(0, 0.3, lon_g.shape)
     elif var_matriks == 'Ocean_Health_Index':
-        v_base = 77.0 + np.cos(lon_g / 4.0) * 5.0 + np.sin(lat_g / 3.0) * 2.0 + np.random.normal(0, 0.4, lon_g.shape)
+        v_base = 76.0 + np.cos(lon_g / 3.0) * 4.5 + np.sin(lat_g / 2.0) * 2.5 + np.random.normal(0, 0.2, lon_g.shape)
     else:
-        v_base = 0.3 + np.sin(lon_g / 2.0) * 1.1 + np.random.normal(0, 0.2, lon_g.shape)
+        v_base = 0.4 + np.sin(lon_g / 1.5) * 1.1 + np.random.normal(0, 0.1, lon_g.shape)
         
     v_base[mask_daratan] = np.nan
     df_map = pd.DataFrame({'lat': lat_g.flatten(), 'lon': lon_g.flatten(), var_matriks: v_base.flatten()}).dropna()
 
-    # --- KONTEN DASHBOARD UTAMA ---
-    st.markdown(f"## 📊 Dashboard Analisis Spasial - {mode_analisis}")
+    # --- MAIN LAYOUT CONTENT ---
+    st.markdown(f"## 📊 Dashboard Analisis Spasial - Mode {current_role.upper()}")
     
-    # 🧑‍🌾 VIEW UNTUK MODE MASYARAKAT / NELAYAN
-    if role == 'masyarakat':
+    if current_role == 'masyarakat':
         st.info("🐟 **REKOMENDASI NELAYAN:** Peta lokasi tangkap ikan potensial berhasil diperbarui secara otomatis menggunakan Aliran Data Satelit.")
         
         fig_map = px.scatter_mapbox(
             df_map, lat="lat", lon="lon", color=var_matriks,
-            size=np.ones(len(df_map))*5, zoom=4.6,
+            size=np.ones(len(df_map))*6, zoom=5.3,
             color_continuous_scale="Jet",
             mapbox_style="open-street-map"
         )
         fig_map.update_layout(
-            mapbox=dict(center=dict(lat=-5.5, lon=135.5)), # Mengunci kamera di perairan Papua
+            mapbox=dict(center=dict(lat=-5.0, lon=135.5)),
             margin={"r":0,"t":20,"l":0,"b":0}, height=550
         )
         st.plotly_chart(fig_map, use_container_width=True)
         
-    # 🎓 VIEW LENGKAP UNTUK MODE AKADEMISI / PENELITI SAINS (SISTEM 3 TAB)
     else:
         tab1, tab2, tab3 = st.tabs(["🗺️ 1. Pemetaan Spasial Kontur", "📊 2. Deskriptif Statistik Lengkap", "📈 3. Analisis Temporal & Rose Diagram"])
         
-        # --- TAB 1: PEMETAAN SPASIAL KONTUR (PETA LUAR JELAS KUNCI KORDINAT) ---
         with tab1:
-            if mode_analisis == "📊 Analisis Data Historis":
-                st.markdown(f"#### 🗺️ Distribusi Spasial Parameter - Tahun {tahun_pilih} ({waktu_sub})")
-            elif mode_analisis == "🌐 Analisis Real-Time":
-                st.markdown(f"#### 🌐 Aliran Distribusi Riil Lapisan Permukaan Satelit - `16 Juni 2026`")
-            else:
-                st.markdown(f"#### 🔮 Pemodelan Proyeksi Matriks Spasial - Target Kontur: {waktu_sub}")
-                
+            st.markdown(f"#### 🗺️ Distribusi Spasial Parameter - {matriks_pilih}")
             fig_map = px.scatter_mapbox(
                 df_map, lat="lat", lon="lon", color=var_matriks,
-                size=np.ones(len(df_map))*5, zoom=4.6,
+                size=np.ones(len(df_map))*6, zoom=5.1,
                 color_continuous_scale="Blues" if var_matriks=='Ocean_Health_Index' else "Coolwarm",
                 mapbox_style="open-street-map"
             )
             fig_map.update_layout(
-                mapbox=dict(center=dict(lat=-5.5, lon=135.5)), # MENGUNCI POSISI MAP AGAR LAUT & PULAU PAPUA LANGSUNG MUNCUL
+                mapbox=dict(center=dict(lat=-5.0, lon=135.5)),
                 margin={"r":0,"t":10,"l":0,"b":0}, height=520
             )
             st.plotly_chart(fig_map, use_container_width=True)
             
-        # --- TAB 2: DATA DESKRIPTIF STATISTIK SANGAT LENGKAP ---
         with tab2:
-            st.markdown("#### 🔢 Ringkasan Deskriptif Statistik Parameter Numerik Spasial")
+            st.markdown("#### 🔢 Ringkasan Deskriptif Statistik Parameter Spasial")
             data_seri = df_map[var_matriks]
             
-            # Baris Metrik Utama Matematika Oseanografi
             col_s1, col_s2, col_s3, col_s4 = st.columns(4)
             col_s1.metric("SUM (Total Kumulatif)", f"{data_seri.sum():,.2f}")
             col_s2.metric("MEAN (Nilai Rata-Rata)", f"{data_seri.mean():.4f}")
@@ -189,16 +194,13 @@ else:
             col_s8.metric("MEDIAN (Nilai Tengah)", f"{data_seri.median():.4f}")
             
             st.write("<br>", unsafe_allow_html=True)
-            st.markdown("##### 📄 Tabel Parameter Kuantil & Distribusi Frekuensi Piksel")
             df_desc = data_seri.describe(percentiles=[.10, .25, .5, .75, .90]).to_frame().T
             st.dataframe(df_desc, use_container_width=True)
             
-        # --- TAB 3: TRIPLE-GRAPH TEMPORAL & ROSE DIAGRAM FREKUENSI POLAR ---
         with tab3:
             col_g1, col_g2 = st.columns([6, 4])
-            
             with col_g1:
-                st.markdown("##### 📈 Grafik Analisis Temporal Multi-Dekade")
+                st.markdown("##### 📈 Grafik Analisis Temporal Jangka Panjang")
                 try:
                     df_ts = pd.read_csv("rangkuman_historis_20tahun.csv")
                     df_ts['time'] = pd.to_datetime(df_ts['time'])
@@ -206,40 +208,31 @@ else:
                     df_ts = df_ts.rename(columns={kolom_asal: var_matriks})
                     
                     if mode_analisis == "📊 Analisis Data Historis":
-                        if breakdown == "Bulanan":
-                            df_plot = df_ts.set_index('time').resample('ME').mean().reset_index()
-                            judul_g = f"Tren Klimatologi Bulanan Data Historis {var_matriks} (2001 - 2020)"
-                        else:
-                            df_plot = df_ts.set_index('time').resample('3ME').mean().reset_index()
-                            judul_g = f"Variabilitas Musiman Multi-Dekade {var_matriks} (2001 - 2020)"
-                        fig_ts = px.line(df_plot, x='time', y=var_matriks, title=judul_g)
+                        df_plot = df_ts.set_index('time').resample('ME' if breakdown=="Bulanan" else '3ME').mean().reset_index()
+                        fig_ts = px.line(df_plot, x='time', y=var_matriks, title="Tren Multi-Dekade Historis (2001-2020)")
                         fig_ts.update_traces(line_color='#086982')
-                    
                     elif mode_analisis == "🌐 Analisis Real-Time":
                         dates_rt = pd.date_range(start="2026-01-01", end="2026-06-16", freq="D")
                         np.random.seed(42)
-                        values_rt = 78.0 + np.sin(np.arange(len(dates_rt)) / 12) * 4.0 + np.random.normal(0, 0.4, len(dates_rt))
+                        values_rt = 77.5 + np.sin(np.arange(len(dates_rt)) / 12) * 3.5 + np.random.normal(0, 0.3, len(dates_rt))
                         df_rt = pd.DataFrame({'time': dates_rt, var_matriks: values_rt})
                         fig_ts = px.line(df_rt, x='time', y=var_matriks, title="Aliran Grafik Data Harian Operasional (2026)")
                         fig_ts.update_traces(line_color='#00C4DF')
-                        
-                    else: # Mode Prediksi Proyeksi
+                    else:
                         dates_past = pd.date_range(start="2025-01-01", end="2026-06-16", freq="ME")
                         dates_future = pd.date_range(start="2026-06-17", end="2026-12-31", freq="ME")
-                        df_past = pd.DataFrame({'time': dates_past, var_matriks: 79.0 + np.sin(np.arange(len(dates_past))) * 2.0, 'Kategori': 'Data Observasi'})
-                        df_future = pd.DataFrame({'time': dates_future, var_matriks: 80.5 + np.cos(np.arange(len(dates_future))) * 3.5, 'Kategori': 'Model Prediksi (Proyeksi)'})
+                        df_past = pd.DataFrame({'time': dates_past, var_matriks: 78.5 + np.sin(np.arange(len(dates_past))) * 2.0, 'Kategori': 'Data Observasi'})
+                        df_future = pd.DataFrame({'time': dates_future, var_matriks: 80.0 + np.cos(np.arange(len(dates_future))) * 3.0, 'Kategori': 'Model Prediksi (Proyeksi)'})
                         df_pred = pd.concat([df_past, df_future], ignore_index=True)
-                        fig_ts = px.line(df_pred, x='time', y=var_matriks, color='Kategori', title="Kurva Estimasi Proyeksi Tren Iklim Semester II - 2026", color_discrete_map={'Data Observasi': '#086982', 'Model Prediksi (Proyeksi)': '#FF4B4B'})
+                        fig_ts = px.line(df_pred, x='time', y=var_matriks, color='Kategori', title="Kurva Proyeksi Tren Semester II - 2026")
                     
                     fig_ts.update_layout(hovermode="x unified", plot_bgcolor="rgba(0,0,0,0)", height=380)
                     st.plotly_chart(fig_ts, use_container_width=True)
-                except Exception as e:
-                    st.warning("Menyinkronkan data runtun waktu di server...")
+                except:
+                    st.warning("Menyinkronkan data runtun waktu...")
                     
             with col_g2:
-                st.markdown("##### 🌹 Rose Diagram Analisis (Polar Data Distribution)")
-                
-                # Pengolahan Histogram Polar Berdasarkan Distribusi Frekuensi Data Spasial Aktif
+                st.markdown("##### 🌹 Rose Diagram Analisis (Polar Frequency)")
                 counts, bins = np.histogram(df_map[var_matriks], bins=12)
                 angles = np.linspace(0, 360, len(counts), endpoint=False)
                 
