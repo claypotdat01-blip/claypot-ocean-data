@@ -456,60 +456,30 @@ with st.sidebar:
 """, unsafe_allow_html=True)
 
 # =========================================
-# LAND MASK
+# LAND MASK — Diperbarui untuk Papua Selatan
 # =========================================
 def is_land(lat, lon):
-    """
-    Land mask manual untuk kawasan Papua & Laut Arafura.
-    Koordinat batas dibuat berdasarkan garis pantai aktual.
-    Return True = daratan (titik dibuang).
-    """
-
-    # ── DARATAN UTAMA PAPUA (pesisir selatan) ──────────────────────────
-    # Pantai selatan Papua membentuk garis kasar dari barat ke timur
-    # Kita gunakan potongan-potongan polygon per segmen longitude
-
-    # Ujung barat Papua (Kepala Burung / Sorong area)
-    if 129.0 <= lon <= 132.5:
-        # Garis pantai selatan Kepala Burung ~-4.0 sampai -6.5
-        # Daratan di atas garis pantai selatan
-        south_coast = -4.2 - (lon - 129.0) * 0.35   # turun dari -4.2 ke ~-5.2
-        if lat > south_coast:
-            return True
-
-    # Teluk Bintuni — cekungan teluk (bukan daratan, biarkan sebagai laut)
-    # Teluk Bintuni: lon 133.0–134.0, lat -1.5 sampai -3.5 → biarkan
-    if 132.5 <= lon <= 133.8:
-        # Daratan di utara (mainland Papua), pantai selatan sekitar -4.0
-        if lat > -4.0:
-            return True
-        # Semenanjung Bomberai di selatan Teluk Bintuni
-        if lat > -4.5 and lon <= 133.2:
-            return True
-
-    # Segmen tengah Papua (Merauke corridor)
-    if 133.8 <= lon <= 137.0:
-        # Pantai selatan Papua di sini sekitar -5.0 hingga -6.5
-        south_coast = -5.0 - (lon - 133.8) * 0.45
-        if lat > south_coast:
-            return True
-
-    # Teluk Flamingo / Mappi area
-    if 137.0 <= lon <= 138.5:
-        south_coast = -6.5 - (lon - 137.0) * 0.2
-        if lat > south_coast:
-            return True
-
-    # Merauke ke perbatasan PNG
-    if 138.5 <= lon <= 141.0:
-        south_coast = -6.8
-        if lat > south_coast:
-            return True
-
-    # PNG (east of 141)
-    if lon > 141.0:
-        if lat > -7.0:
-            return True
+    # Zonasi 1: Kepala Burung / Papua Barat bagian barat
+    if lon >= 130.0 and lon < 134.0 and lat > -5.0: 
+        return True
+    
+    # Zonasi 2: Pesisir seputar Teluk Cendrawasih bawah
+    if lon >= 134.0 and lon < 136.0 and lat > -4.5: 
+        return True
+    
+    # Zonasi 3: Mimika dan sekitarnya
+    if lon >= 136.0 and lon < 137.5 and lat > -5.5: 
+        return True
+    
+    # Zonasi 4: Area Pulau Yos Sudarso (Dolok) yang menjorok ke selatan
+    if lon >= 137.5 and lon < 139.0 and lat > -7.4: 
+        return True
+    
+    # Zonasi 5: Merauke hingga batas spektrum timur (Papua Nugini)
+    if lon >= 139.0 and lon <= 144.0 and lat > -8.4: 
+        return True
+        
+    return False
 
     # ── KEPULAUAN KECIL ────────────────────────────────────────────────
 
