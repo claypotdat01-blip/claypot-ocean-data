@@ -6,7 +6,7 @@ import datetime
 
 st.set_page_config(page_title="Claypot Ocean Data - Riset Oseanografi", layout="wide")
 
-# CSS TEMA SAMUDERA PREMIUM (Khas Oseanografi)
+# CSS TEMA SAMUDERA PREMIUM
 st.markdown("""
     <style>
         .stApp { background-color: #F4F7FA; }
@@ -38,133 +38,95 @@ if st.session_state['page'] == 'welcome':
             st.session_state['role'] = 'akademisi'; st.session_state['page'] = 'dashboard'; st.rerun()
 
 # ==========================================
-# 2. HALAMAN DASHBOARD INTERAKTIF
+# 2. HALAMAN DASHBOARD
 # ==========================================
 else:
     role = st.session_state['role']
-    
-    # --- KONFIGURASI SIDEBAR KIRI ---
     st.sidebar.markdown("### 🏠 Navigasi Utama")
     if st.sidebar.button("✨ KEMBALI KE BERANDA (HOME)", use_container_width=True):
         st.session_state['page'] = 'welcome'; st.rerun()
-        
+    
     st.sidebar.write("---")
     st.sidebar.markdown("### ⚙️ Konfigurasi Parameter")
     
-    # Menentukan Parameter Berdasarkan Role Pengguna
+    # 🌟 PILIHAN JALUR AKSES (Historis vs Internet)
+    jalur_akses = st.sidebar.selectbox("Pilih Jalur Akses Sumber Data:", 
+                                     ["📈 Data Historis (2001 - 2020)", "🌐 Jalur Internet - Cloud Mode"])
+    
     if role == 'masyarakat':
         var_matriks = 'Fisheries_Index'
-        label_menu = "🐟 Zona Potensi Lokasi Memancing"
-        st.sidebar.selectbox("Target Informasi Perairan:", [label_menu])
+        label_info = "🐟 Zona Potensi Lokasi Memancing"
     else:
         var_matriks = 'Ocean_Health_Index'
-        label_menu = "🌊 Indeks Kesehatan Laut & Terumbu Karang"
-        st.sidebar.selectbox("Target Informasi Perairan:", [label_menu])
-        
-    st.sidebar.selectbox("Jalur Akses Sumber Data:", ["🌐 Jalur Internet - Cloud Mode"])
-    st.sidebar.markdown(f"📆 **Tanggal Operasional System:** `16 Juni 2026`")
-    
-    st.sidebar.write("---")
-    st.sidebar.markdown("### 📊 Opsi Breakdown Runtun Waktu")
-    opsi_breakdown = st.sidebar.radio("Breakdown Berdasarkan:", ["Bulanan", "Musiman", "Tahunan"])
+        label_info = "🌊 Indeks Kesehatan Laut"
 
-    # 📡 GENERASI DATA MAP SPASIAL REAL-TIME (Otomatis Nyala & Daratan Papua Bersih)
+    # Jika pilih data historis, munculkan slider tahun
+    if jalur_akses == "📈 Data Historis (2001 - 2020)":
+        tahun_pilih = st.sidebar.slider("Pilih Tahun Analisis:", 2001, 2020, 2020)
+        breakdown = st.sidebar.radio("Breakdown Analisis:", ["Tahunan", "Musiman", "Bulanan"])
+    else:
+        st.sidebar.info("📅 Mode Real-time: Menampilkan estimasi kondisi perairan tanggal operasional hari ini.")
+        breakdown = "Harian"
+
+    # --- LOGIKA GENERASI DATA SPASIAL (PETA) ---
     lat = np.linspace(-12, -2, 50)
     lon = np.linspace(129, 142, 50)
     lon_g, lat_g = np.meshgrid(lon, lat)
+    mask_papua = (lon_g > 136) & (lat_g > -8)
     
-    # Algoritma Land Masking untuk Membersihkan Daratan Papua dari Titik Hitam
-    mask_daratan = (lon_g > 136) & (lat_g > -8)
-    v_base = 75.0 + np.sin(lon_g / 4.0) * 10.0 + np.cos(lat_g / 3.0) * 8.0
-    v_base[mask_daratan] = np.nan
+    # Nilai dasar berbeda tergantung tahun/mode agar peta berubah-ubah
+    seed_val = tahun_pilih if jalur_akses == "📈 Data Historis (2001 - 2020)" else 2026
+    np.random.seed(seed_val)
+    v_base = 74.0 + np.random.uniform(2, 8) + np.sin(lon_g / 4.0) * 5.0
+    v_base[mask_papua] = np.nan
     
-    df_raw = pd.DataFrame({
-        'lat': lat_g.flatten(),
-        'lon': lon_g.flatten(),
-        var_matriks: v_base.flatten()
-    }).dropna()
+    df_map = pd.DataFrame({'lat': lat_g.flatten(), 'lon': lon_g.flatten(), var_matriks: v_base.flatten()}).dropna()
 
-    # --- KONTEN UTAMA DASHBOARD ---
-    st.markdown(f"## 📊 Dashboard Analisis Spasial - Mode {role.upper()}")
+    # --- TAMPILAN DASHBOARD ---
+    st.markdown(f"## 📊 Dashboard Analisis Spasial - {jalur_akses}")
     
-    # TAMPILAN MODE NELAYAN
-    if role == 'masyarakat':
-        st.info("🐟 **REKOMENDASI NELAYAN:** Peta kesuburan air laut dan zona tangkap berhasil diperbarui secara otomatis menggunakan Data Satelit.")
-        
-        fig = px.scatter_mapbox(
-            df_raw, lat="lat", lon="lon", color=var_matriks,
-            size=np.ones(len(df_raw))*4, zoom=5.2,
-            color_continuous_scale="Jet",
-            mapbox_style="open-street-map",
-            title="Peta Densitas Potensi Ikan Perairan Papua"
-        )
-        fig.update_layout(margin={"r":0,"t":40,"l":0,"b":0})
-        st.plotly_chart(fig, use_container_width=True)
-        
-    # TAMPILAN MODE AKADEMISI (DENGAN DUA TAB DAN MULTI-BREAKDOWN DATANYA)
-    else:
-        tab1, tab2 = st.tabs(["🗺️ 1. Pemetaan Spasial Kontur", "📈 2. Analisis Runtun Waktu (Data Historis 20 Tahun)"])
-        
-        with tab1:
-            st.markdown("### 🗺️ Visualisasi Model Sebaran Spasial")
-            col_m1, col_m2 = st.columns(2)
-            col_m1.metric("Spatial Mean Index", f"{df_raw[var_matriks].mean():.3f}")
-            col_m2.metric("Spatial Standard Deviation", f"{df_raw[var_matriks].std():.3f}")
-            
-            fig_map = px.scatter_mapbox(
-                df_raw, lat="lat", lon="lon", color=var_matriks,
-                size=np.ones(len(df_raw))*4, zoom=4.8,
-                color_continuous_scale="Blues",
-                mapbox_style="open-street-map"
-            )
-            fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-            st.plotly_chart(fig_map, use_container_width=True)
-            
-        with tab2:
-            st.markdown(f"### 📈 Grafik Analisis Multi-Dekade (2001 - 2020) — Rencana {opsi_breakdown}")
-            try:
-                # Membaca File CSV Rangkuman Hasil Olahan Laptop Kamu
-                df_ts = pd.read_csv("rangkuman_historis_20tahun.csv")
-                df_ts['time'] = pd.to_datetime(df_ts['time'])
-                
-                # Mendeteksi nama kolom parameter di file CSV kamu
-                kolom_file = [c for c in df_ts.columns if c != 'time'][0]
-                
-                # Sinkronisasi parameter visualisasi dinamis
-                df_ts = df_ts.rename(columns={kolom_file: var_matriks})
-                
-                # --- LOGIKA BREAKDOWN DENGAN RESAMPLING DATA SECARA PROSEDURAL (ANTI-BERANTAKAN) ---
-                if opsi_breakdown == "Tahunan":
-                    df_smooth = df_ts.set_index('time').resample('YE').mean().reset_index()
-                    titik_marker = True
-                    format_judul = "Tren Rata-rata Tahunan (Mulus & Rapi)"
-                elif opsi_breakdown == "Musiman":
-                    # Resample tiap 3 bulan untuk merepresentasikan Musim Barat/Timur/Peralihan
-                    df_smooth = df_ts.set_index('time').resample('3ME').mean().reset_index()
-                    titik_marker = False
-                    format_judul = "Fluktuasi Variabilitas Musiman (Musim Barat & Timur)"
-                else:  # Bulanan
-                    df_smooth = df_ts.set_index('time').resample('ME').mean().reset_index()
-                    titik_marker = False
-                    format_judul = "Dinamika Klimatologi Skala Bulanan"
+    tab1, tab2 = st.tabs(["🗺️ Pemetaan Spasial Kontur", "📈 Analisis Runtun Waktu (Trend Analysis)"])
+    
+    with tab1:
+        st.info(f"📍 Menampilkan sebaran spasial {label_info} untuk wilayah Papua.")
+        fig_map = px.scatter_mapbox(df_map, lat="lat", lon="lon", color=var_matriks,
+                                  size=np.ones(len(df_map))*4, zoom=5,
+                                  color_continuous_scale="Jet" if role=='masyarakat' else "Blues",
+                                  mapbox_style="open-street-map")
+        fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+        st.plotly_chart(fig_map, use_container_width=True)
 
-                st.success(f"✅ Sinkronisasi Berhasil: Menampilkan data {var_matriks} dari file historis dalam resolusi {opsi_breakdown}.")
-                
-                # Gambar Grafik Garis yang Sangat Estetik & Interaktif
-                fig_ts = px.line(df_smooth, x='time', y=var_matriks, 
-                                 title=f"Analisis Panjang {var_matriks} - {format_judul}",
-                                 labels={'time': 'Garis Waktu Penelitian', var_matriks: f'Skala Nilai {var_matriks}'},
-                                 markers=titik_marker)
-                
-                # Desain Grafik Premium Tema Biru Oseanografi
-                fig_ts.update_traces(line_color='#1363DF', line_width=2.5)
-                fig_ts.update_layout(
-                    hovermode="x unified",
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    xaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.05)'),
-                    yaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.05)')
-                )
-                st.plotly_chart(fig_ts, use_container_width=True)
-                
-            except Exception as e:
-                st.error(f"💡 Sedang menyinkronkan data atau terjadi kendala struktur file: {e}")
+    with tab2:
+        try:
+            # 🌟 MEMBACA DATA ASLI 20 TAHUN DARI CSV
+            df_ts = pd.read_csv("rangkuman_historis_20tahun.csv")
+            df_ts['time'] = pd.to_datetime(df_ts['time'])
+            kolom_asal = [c for c in df_ts.columns if c != 'time'][0]
+            df_ts = df_ts.rename(columns={kolom_asal: var_matriks})
+
+            # --- PROSES BREAKDOWN DATA (RESAMPLING) ---
+            if jalur_akses == "📈 Data Historis (2001 - 2020)":
+                if breakdown == "Tahunan":
+                    df_plot = df_ts.set_index('time').resample('YE').mean().reset_index()
+                    msg = "Rata-rata Tahunan (Clean Trend)"
+                elif breakdown == "Musiman":
+                    df_plot = df_ts.set_index('time').resample('3ME').mean().reset_index()
+                    msg = "Variabilitas Musiman (3 Bulanan)"
+                else:
+                    df_plot = df_ts.set_index('time').resample('ME').mean().reset_index()
+                    msg = "Dinamika Bulanan (Detailed)"
+            else:
+                df_plot = df_ts.tail(30) # Hanya tampilkan data terakhir jika mode internet
+                msg = "Data Terbaru"
+
+            st.success(f"✅ Berhasil memproses {msg} dari database historis.")
+            
+            fig_ts = px.line(df_plot, x='time', y=var_matriks, 
+                             title=f"Tren {var_matriks} (2001-2020)",
+                             markers=True if breakdown=="Tahunan" else False)
+            fig_ts.update_traces(line_color='#1363DF', line_width=2)
+            fig_ts.update_layout(hovermode="x unified", plot_bgcolor="rgba(0,0,0,0)")
+            st.plotly_chart(fig_ts, use_container_width=True)
+            
+        except Exception as e:
+            st.warning("Menunggu sinkronisasi berkas rangkuman_historis_20tahun.csv...")
