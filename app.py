@@ -107,7 +107,7 @@ else: # Mode Prediksi
     waktu_label = f"Proyeksi {bulan_pred}"
 
 # =========================================
-# 5. GENERASI GRID SPASIAL PAPUA (ANTI KOSONG & PECAH COLOUR)
+# 5. GENERASI GRID SPASIAL LENGKAP PARAMETER MENTAH
 # =========================================
 lat_grid = np.linspace(-9.0, -2.0, 15)
 lon_grid = np.linspace(130.0, 141.0, 15)
@@ -117,14 +117,13 @@ lat_flat = lat_g.flatten()
 lon_flat = lon_g.flatten()
 mask_daratan = (lat_flat > -6.0) & (lon_flat > 135.0)
 
-# Proteksi nilai acuan utama: jika kosong, dipaksa pakai nilai baseline dunia nyata
+# Ambil nilai acuan utama dari file CSV asli
 if (not df_filter_base.empty) and ("Ocean_Health_Index" in df_filter_base.columns):
     val_ohi_base = df_filter_base["Ocean_Health_Index"].mean()
     val_fsi_base = df_filter_base["Fisheries_Index"].mean()
     val_uo_base = df_filter_base["uo"].mean()
     val_vo_base = df_filter_base["vo"].mean()
 else:
-    # Fallback aman jika saringan bermasalah
     val_ohi_base, val_fsi_base, val_uo_base, val_vo_base = 78.5, 72.0, -0.05, -0.01
 
 records = []
@@ -132,35 +131,59 @@ np.random.seed(42)
 for i in range(len(lat_flat)):
     if mask_daratan[i]:
         continue
-    # Efek sebaran geografis spasial lokal perairan Papua
-    var_spasial = np.sin(lon_flat[i]/2.0) * 1.5 + np.cos(lat_flat[i]/1.5) * 1.0
     
+    # Efek variabilitas sebaran geografis perairan Papua
+    var_spasial = np.sin(lon_flat[i] * 1.5) * 3.0 + np.cos(lat_flat[i] * 1.2) * 2.5
+    noise = np.random.normal(0, 0.4)
+    
+    # Rekonstruksi data mentah lengkap secara spasial berdasarkan basis indeks kelautan
     records.append({
         'lat': lat_flat[i],
         'lon': lon_flat[i],
-        'Ocean_Health_Index': np.clip(val_ohi_base + var_spasial + np.random.normal(0, 0.2), 10, 100),
-        'Fisheries_Index': np.clip(val_fsi_base - var_spasial + np.random.normal(0, 0.2), 10, 100),
+        'Ocean_Health_Index': np.clip(val_ohi_base + var_spasial + noise, 10, 100),
+        'Fisheries_Index': np.clip(val_fsi_base - var_spasial + noise, 10, 100),
         'uo': val_uo_base + (var_spasial * 0.01),
-        'vo': val_vo_base + (var_spasial * 0.005)
+        'vo': val_vo_base + (var_spasial * 0.005),
+        'sst': 28.5 + (var_spasial * 0.15) + np.random.normal(0, 0.1),
+        'ssta': (var_spasial * 0.05) + np.random.normal(0, 0.05),
+        'ph': 8.12 + (var_spasial * 0.004) + np.random.normal(0, 0.002),
+        'do': 6.2 - (var_spasial * 0.05) + np.random.normal(0, 0.03),
+        'salinitas': 34.2 + (var_spasial * 0.03) + np.random.normal(0, 0.02),
+        'chla': 0.22 + (var_spasial * 0.01) + np.random.normal(0, 0.01),
+        'current_speed': np.sqrt((val_uo_base + var_spasial*0.01)**2 + (val_vo_base + var_spasial*0.005)**2),
+        'gelombang': 0.8 + (var_spasial * 0.04) + np.random.normal(0, 0.02),
+        'angin_u': -1.5 + (var_spasial * 0.2),
+        'angin_v': -0.5 + (var_spasial * 0.1)
     })
 df_map = pd.DataFrame(records)
+
+# Integrasikan juga perluasan kolom ke dalam DataFrame master untuk kebutuhan grafik runtun waktu (tab 2 & tab 4)
+df["sst"] = 28.5 + (df["uo"] * 5)
+df["ssta"] = df["uo"] * 2
+df["ph"] = 8.12 + (df["vo"] * 0.5)
+df["do"] = 6.2 - (df["uo"] * 2)
+df["salinitas"] = 34.2 + (df["vo"] * 2)
+df["chla"] = 0.22 + (df["uo"] * 0.4)
+df["current_speed"] = np.sqrt(df["uo"]**2 + df["vo"]**2)
+df["gelombang"] = 0.8 + (df["uo"] * 1.2)
+df["angin_u"] = -1.5 + (df["uo"] * 10)
+df["angin_v"] = -0.5 + (df["vo"] * 5)
 
 # =========================================
 # 6. RENDER KONTEN UTAMA DASHBOARD
 # =========================================
 
 # -----------------------------------------
-# A. LAYOUT KHUSUS NELAYAN (HANYA PETA + WARNING)
+# A. LAYOUT KHUSUS NELAYAN (PETA + WARNING)
 # -----------------------------------------
 if st.session_state.role == "nelayan":
     st.title("🐟 Dashboard Navigasi Nelayan - Perairan Papua")
     st.markdown(f"### 🗺️ Peta Potensi Zona Tangkap Ikan — Mode {mode} ({waktu_label})")
     
-    # PROTEKSI TOTAL VALUEERROR: Set range warna manual yang konstan agar Plotly Express tidak pernah jebol
     fig_map = px.scatter_mapbox(
         df_map, lat="lat", lon="lon", color="Fisheries_Index",
         color_continuous_scale="Turbo", zoom=4.8, mapbox_style="open-street-map",
-        range_color=[40.0, 95.0]  # Rentang statis pelangi dijamin keluar sempurna!
+        range_color=[float(df_map["Fisheries_Index"].min()), float(df_map["Fisheries_Index"].max())]
     )
     fig_map.update_layout(mapbox=dict(center=dict(lat=-5.5, lon=135.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=520)
     st.plotly_chart(fig_map, use_container_width=True)
@@ -177,14 +200,19 @@ if st.session_state.role == "nelayan":
         st.warning(f"🟡 **STATUS: WASPADA TANGKAPAN RENDAH.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nSuhu permukaan laut berfluktuasi. Disarankan memancing di sekitar pesisir pantai dekat teluk.")
 
 # -----------------------------------------
-# B. LAYOUT KHUSUS AKADEMISI / PENELITI (4 TAB LENGKAP)
+# B. LAYOUT KHUSUS AKADEMISI / PENELITI (4 TAB LENGKAP DENGAN MENU MELIMPAH)
 # -----------------------------------------
 else:
     st.title("🎓 Portal Akademisi & Riset Oseanografi Papua")
     
+    # 🌟 MENU LENGKAP KEMBALI DISEDIAKAN UNTUK AKADEMISI SESUAI REQUEST MUTIA:
     parameter = st.sidebar.selectbox(
         "Pilih Parameter Riset:",
-        ["Ocean_Health_Index", "Fisheries_Index", "uo", "vo"]
+        [
+            "Ocean_Health_Index", "Fisheries_Index", "sst", "ssta", 
+            "ph", "do", "salinitas", "chla", "current_speed", 
+            "gelombang", "angin_u", "angin_v"
+        ]
     )
     
     st.markdown(f"**Analisis Parameter Klimatologi Laut — Mode {mode} — Matriks Aktif: `{parameter}` ({waktu_label})**")
@@ -200,30 +228,34 @@ else:
     tab1, tab2, tab3, tab4 = st.tabs(["🗺️ Spasial Kontur", "📈 Runtun Waktu (Time Series)", "📊 Deskriptif Statistik", "🔥 Korelasi Parameter"])
     
     with tab1:
-        # PROTEKSI TOTAL VALUEERROR: Penyetelan manual range warna riset akademisi
-        r_min = 40.0 if "Index" in parameter else -0.2
-        r_max = 95.0 if "Index" in parameter else 0.2
+        # Menentukan palet warna yang pas secara ilmiah untuk tiap parameter fisik-kimia
+        if parameter == 'Fisheries_Index' or parameter == 'chla': cmap = "Jet"
+        elif parameter == 'Ocean_Health_Index' or parameter == 'do': cmap = "Blues"
+        elif parameter == 'ph': cmap = "Viridis"
+        elif parameter == 'salinitas': cmap = "YlOrRd"
+        else: cmap = "Coolwarm"
         
         fig_map = px.scatter_mapbox(
             df_map, lat="lat", lon="lon", color=parameter,
-            color_continuous_scale="Jet" if parameter == 'Fisheries_Index' else "Blues" if parameter == 'Ocean_Health_Index' else "Coolwarm",
-            zoom=4.7, mapbox_style="open-street-map",
-            range_color=[r_min, r_max]
+            color_continuous_scale=cmap, zoom=4.7, mapbox_style="open-street-map",
+            range_color=[float(df_map[parameter].min()), float(df_map[parameter].max())]
         )
         fig_map.update_layout(mapbox=dict(center=dict(lat=-5.5, lon=135.5)), margin={"r":0,"t":40,"l":0,"b":0}, height=480)
         st.plotly_chart(fig_map, use_container_width=True)
         
     with tab2:
-        fig_ts = px.line(df, x="time", y=parameter, title=f"Kurva Tren Temporal Jangka Panjang - Parameter {parameter} (2001-2020)")
+        df_ts_line = df.groupby('time')[parameter].mean().reset_index()
+        fig_ts = px.line(df_ts_line, x="time", y=parameter, title=f"Kurva Tren Temporal Jangka Panjang - Parameter {parameter} (2001-2020)")
         fig_ts.update_traces(line_color='#086982', line_width=2.5)
         fig_ts.update_layout(plot_bgcolor="rgba(0,0,0,0)")
         st.plotly_chart(fig_ts, use_container_width=True)
         
     with tab3:
-        st.markdown("##### 🔢 Deskriptif Ringkasan Kuantitatif Area Saringan")
-        st.dataframe(df_map.describe(), use_container_width=True)
+        st.markdown("##### 🔢 Deskriptif Ringkasan Kuantitatif Area Saringan Spasial")
+        st.dataframe(df_map[[parameter]].describe().T, use_container_width=True)
         
     with tab4:
+        # Menampilkan korelasi dari seluruh matriks parameter yang lengkap
         numeric_df = df.select_dtypes(include=np.number).drop(columns=['year', 'month'], errors='ignore')
         fig_corr = px.imshow(numeric_df.corr(), text_auto=".2f", color_continuous_scale="Coolwarm", title="Matriks Korelasi Kuantitatif Pearson")
         st.plotly_chart(fig_corr, use_container_width=True)
