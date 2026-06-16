@@ -141,11 +141,11 @@ else: # Mode Prediksi
     waktu_label = f"Proyeksi {bulan_pred}"
 
 # =========================================
-# 5. GENERASI GRID SPASIAL INTERPOLASI LAUT ARAFURA
+# 5. GENERASI GRID SPASIAL INTERPOLASI SUPREME MULTI-TITIK
 # =========================================
-# Naikkan ke grid 30x30 agar hasil interpolasi kontur warnanya super halus dan rapat!
-lat_grid = np.linspace(-12.0, -4.0, 30)  
-lon_grid = np.linspace(129.0, 144.0, 30)
+# 🌟 KEPADATAN GRID DINAIKKAN KE 40x40: Untuk menjamin luasan area terinterpolasi rapat sempurna!
+lat_grid = np.linspace(-12.0, -4.0, 40)  
+lon_grid = np.linspace(129.0, 144.0, 40)
 lon_g, lat_g = np.meshgrid(lon_grid, lat_grid)
 
 lat_flat = lat_g.flatten()
@@ -163,7 +163,7 @@ for i in range(len(lat_flat)):
     t_lat = lat_flat[i]
     t_lon = lon_flat[i]
     
-    # Land Masking ketat melindungi pulau Papua dari kebocoran warna kontur
+    # Land Masking presisi anti-bocor darat pulau Papua dan Merauke asli
     if t_lon > 134.5 and t_lat > -4.8: continue
     if t_lon > 137.4 and t_lat > -8.4: continue
     if t_lon > 140.5 and t_lat > -9.2: continue
@@ -218,16 +218,16 @@ df_map = pd.DataFrame(records)
 # 6. RENDER KONTEN UTAMA DASHBOARD
 # =========================================
 
-# --- A. LAYOUT NELAYAN (KONTEN HEATMAP HALUS BERWARNA) ---
+# --- A. LAYOUT NELAYAN (KONTUR HALUS MAKSIMAL) ---
 if st.session_state.role == "nelayan":
     st.title("🐟 Dashboard Navigasi Nelayan - Perairan Papua")
     st.markdown(f"### 🗺️ Peta Kontur Potensi Zona Tangkap Ikan — Mode {mode} ({waktu_label})")
     
     if not df_map.empty:
-        # 🌟 LOGIKA UTAMA DIUBAH: Menggunakan density_mapbox agar bintik (dot) berubah jadi interpolasi warna kontinu yang halus!
+        # 🌟 RADIUS DINAIKKAN KE 45: Membuat lingkaran melebur menyatu rata menjadi kontur halus ter-interpolasi penuh
         fig_map = px.density_mapbox(
             df_map, lat="lat", lon="lon", z="Fisheries_Index",
-            radius=22, opacity=0.85, zoom=4.8,
+            radius=45, opacity=0.85, zoom=4.8,
             color_continuous_scale="Turbo", mapbox_style="open-street-map",
             range_color=[float(df_map["Fisheries_Index"].min()), float(df_map["Fisheries_Index"].max())]
         )
@@ -245,7 +245,7 @@ if st.session_state.role == "nelayan":
         else:
             st.warning(f"🟡 **STATUS: WASPADA TANGKAPAN RENDAH.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nSuhu permukaan laut berfluktuasi. Disarankan memancing di sekitar pesisir pantai dekat teluk.")
 
-# --- B. LAYOUT AKADEMISI (KONTEN HEATMAP 12 PARAMETER LENGKAP) ---
+# --- B. LAYOUT AKADEMISI (KONTUR HALUS MAKSIMAL) ---
 else:
     st.title("🎓 Portal Akademisi & Riset Oseanografi Papua")
     
@@ -279,10 +279,10 @@ else:
             elif parameter in ['sst', 'ssta']: cmap = "Thermal"
             else: cmap = "Icefire"
             
-            # 🌟 INTERPOLASI SPASIAL HALUS: Menggunakan density_mapbox untuk Akademisi
+            # 🌟 RADIUS 45 DIAPLIKASIKAN UNTUK AKADEMISI
             fig_map = px.density_mapbox(
                 df_map, lat="lat", lon="lon", z=parameter,
-                radius=22, opacity=0.85, zoom=4.7, mapbox_style="open-street-map",
+                radius=45, opacity=0.85, zoom=4.7, mapbox_style="open-street-map",
                 color_continuous_scale=cmap,
                 range_color=[float(df_map[parameter].min()), float(df_map[parameter].max())]
             )
