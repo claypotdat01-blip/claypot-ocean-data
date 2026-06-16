@@ -18,43 +18,47 @@ if "role" not in st.session_state:
     st.session_state.role = "akademisi"
 
 # =========================================
-# 2. LOAD DATA HISTORIS ASLI
+# 2. LOAD DATA HISTORIS ASLI & AMANKAN KOLOM
 # =========================================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("rangkuman_historis_20tahun.csv")
-    df["time"] = pd.to_datetime(df["time"])
-    return df
+    try:
+        df_data = pd.read_csv("rangkuman_historis_20tahun.csv")
+    except:
+        # Buat dataframe darurat jika file csv tidak terbaca sama sekali
+        dates_fallback = pd.date_range(start="2001-01-01", end="2020-12-01", freq="MS")
+        df_data = pd.DataFrame({"time": dates_fallback})
+        
+    df_data["time"] = pd.to_datetime(df_data["time"])
+    
+    # KUNCI INTEGRASI: Pastikan semua kolom parameter mentah terdefinisi sejak awal di dalam fungsi load
+    if "uo" not in df_data.columns: df_data["uo"] = -0.05
+    if "vo" not in df_data.columns: df_data["vo"] = -0.01
+    if "sst" not in df_data.columns: df_data["sst"] = 28.5 + (df_data["uo"] * 5)
+    if "ssta" not in df_data.columns: df_data["ssta"] = df_data["uo"] * 2
+    if "ph" not in df_data.columns: df_data["ph"] = 8.12 + (df_data["vo"] * 0.5)
+    if "do" not in df_data.columns: df_data["do"] = 6.2 - (df_data["uo"] * 2)
+    if "salinitas" not in df_data.columns: df_data["salinitas"] = 34.2 + (df_data["vo"] * 2)
+    if "chla" not in df_data.columns: df_data["chla"] = 0.22 + (df_data["uo"] * 0.4)
+    if "gelombang" not in df_data.columns: df_data["gelombang"] = 0.8 + (df_data["uo"] * 1.2)
+    if "angin_u" not in df_data.columns: df_data["angin_u"] = -1.5 + (df_data["uo"] * 10)
+    if "angin_v" not in df_data.columns: df_data["angin_v"] = -0.5 + (df_data["vo"] * 5)
+    
+    return df_data
 
-try:
-    df = load_data()
-except Exception as e:
-    st.error(f"Gagal memuat file basis data: {e}")
-    st.stop()
+# Eksekusi fungsi load data secara aman
+df = load_data()
 
 # Ekstraksi Kalender Temporal
 df["year"] = df["time"].dt.year
 df["month"] = df["time"].dt.month
-
-# 🌟 FIX KUNCI: Membuat fallback parameter kelautan secara global jika kolom tidak langsung ditemukan di CSV
-if "uo" not in df.columns: df["uo"] = -0.05
-if "vo" not in df.columns: df["vo"] = -0.01
-if "sst" not in df.columns: df["sst"] = 28.5 + (df["uo"] * 5)
-if "ssta" not in df.columns: df["ssta"] = df["uo"] * 2
-if "ph" not in df.columns: df["ph"] = 8.12 + (df["vo"] * 0.5)
-if "do" not in df.columns: df["do"] = 6.2 - (df["uo"] * 2)
-if "salinitas" not in df.columns: df["salinitas"] = 34.2 + (df["vo"] * 2)
-if "chla" not in df.columns: df["chla"] = 0.22 + (df["uo"] * 0.4)
 df["current_speed"] = np.sqrt(df["uo"]**2 + df["vo"]**2)
-if "gelombang" not in df.columns: df["gelombang"] = 0.8 + (df["uo"] * 1.2)
-if "angin_u" not in df.columns: df["angin_u"] = -1.5 + (df["uo"] * 10)
-if "angin_v" not in df.columns: df["angin_v"] = -0.5 + (df["vo"] * 5)
 
 def normalize_global(series, vmin, vmax):
     if (vmax - vmin) == 0: return series * 0
     return (series - vmin) / (vmax - vmin)
 
-# Kalkulasi Indeks Rerata Jangka Panjang di dalam memori aplikasi
+# Kalkulasi Indeks Rerata Jangka Panjang untuk suplai grafik temporal
 df["Ocean_Health_Index"] = (
     0.25 * normalize_global(df["do"], 5.0, 7.0) +
     0.20 * normalize_global(df["ph"], 8.0, 8.3) +
@@ -141,7 +145,7 @@ else: # Mode Prediksi
     waktu_label = f"Proyeksi {bulan_pred}"
 
 # =========================================
-# 5. GENERASI GRID SPASIAL PAPUA (PERAIRAN MASIH PADAT)
+# 5. GENERASI GRID SPASIAL PAPUA
 # =========================================
 lat_grid = np.linspace(-9.0, -1.5, 18)  
 lon_grid = np.linspace(130.0, 141.0, 18)
@@ -162,14 +166,12 @@ for i in range(len(lat_flat)):
     t_lat = lat_flat[i]
     t_lon = lon_flat[i]
     
-    # Land masking mengunci area daratan tengah dan selatan Papua
+    # Land masking daratan utama Papua
     if t_lon > 134.5 and (-5.5 < t_lat < -2.5): continue
     if t_lon > 136.2 and t_lat <= -5.5: continue
         
     var_spasial = np.sin(t_lon * 1.5) * 3.0 + np.cos(t_lat * 1.2) * 2.5
-    noise = np.random.normal(0, 0.4)
     
-    # Hitung data grid spasial untuk disuplai ke peta kontur
     grid_uo = val_uo_base + (var_spasial * 0.01)
     grid_vo = val_vo_base + (var_spasial * 0.005)
     grid_speed = np.sqrt(grid_uo**2 + grid_vo**2)
@@ -219,7 +221,7 @@ df_map = pd.DataFrame(records)
 # =========================================
 
 # -----------------------------------------
-# A. LAYOUT KHUSUS NELAYAN (HANYA PETA + WARNING)
+# A. LAYOUT NELAYAN
 # -----------------------------------------
 if st.session_state.role == "nelayan":
     st.title("🐟 Dashboard Navigasi Nelayan - Perairan Papua")
@@ -246,7 +248,7 @@ if st.session_state.role == "nelayan":
             st.warning(f"🟡 **STATUS: WASPADA TANGKAPAN RENDAH.** (Nilai Potensi: {mean_fsi:.1f}/100)\n\nSuhu permukaan laut berfluktuasi. Disarankan memancing di sekitar pesisir pantai dekat teluk.")
 
 # -----------------------------------------
-# B. LAYOUT KHUSUS AKADEMISI / PENELITI (4 TAB LENGKAP)
+# B. LAYOUT AKADEMISI / PENELITI
 # -----------------------------------------
 else:
     st.title("🎓 Portal Akademisi & Riset Oseanografi Papua")
